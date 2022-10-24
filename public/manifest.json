@@ -1,0 +1,16 @@
+{
+  "name": "渲染钟楼助手",
+  "version": "0.0.1",
+  "description": "向https://www.imdodo.com/tools/clocktower/页面注入一些JavaScript代码，来帮助说书人完成一些自动化操作，让说书人能够更加高效的工作",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "./src/page_popup/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.imdodo.com/tools/clocktower"],
+      "css": ["myStyles.css"],
+      "js": ["contentScript.js"]
+    }
+  ]
+}
