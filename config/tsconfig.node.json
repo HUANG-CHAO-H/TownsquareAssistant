@@ -6,6 +6,6 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "config/vite.config.ts"
+    "vite.config.ts"
   ]
 }

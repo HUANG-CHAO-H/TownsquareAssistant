@@ -1,17 +1,20 @@
 {
   "name": "townsquare_assistant",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build --config config/vite.config.ts",
-    "build-cs": "tsc && vite build --config config/vite.config.cs.ts",
-    "preview": "vite preview"
+    "build": "tsc && vite build --config config/vite.config.ts && ts-node config/manifest.ts",
+    "preview": "vite preview",
+
+    "build-watch": "tsc && vite build --config config/vite.config.ts --mode development",
+    "build-manifest": "ts-node config/manifest.ts"
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@douyinfe/semi-ui": "~2.21.2"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.198",
