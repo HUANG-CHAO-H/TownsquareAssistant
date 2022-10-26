@@ -21,11 +21,18 @@ const manifest: chrome.runtime.ManifestV3 = {
     // （插件图标的）交互动作
     action: {
         // 插件图标
-        default_icon: undefined,
+        default_icon: {
+            16: 'assets/townsquare_icon/townsquare-16x16.png',
+            32: 'assets/townsquare_icon/townsquare-32x32.png',
+            70: 'assets/townsquare_icon/townsquare-70x70.png',
+            96: 'assets/townsquare_icon/townsquare-96x96.png',
+            144: 'assets/townsquare_icon/townsquare-144x144.png',
+            310: 'assets/townsquare_icon/townsquare-310x310.png',
+        },
         // 插件标题（hover提示文本）
         default_title: '渲染钟楼助手',
         // 图标弹窗（点击图标按钮后出现的弹窗）
-        default_popup: 'src/page_popup/index.html',
+        default_popup: 'src/popup.html',
     },
 
     // 插件的设置，配置页面，比如说当用户在工具栏右键点击插件图标，或者导航到扩展的管理页面，并点击【详细】按钮
@@ -45,7 +52,7 @@ const manifest: chrome.runtime.ManifestV3 = {
             // 反向匹配
             exclude_matches: undefined,
             // 要插入的JavaScript文件
-            js: ['static/js/modulepreload-polyfill.js', 'static/js/contentScript.js'],
+            js: ['js/modulepreload-polyfill.js', 'js/contentScript.js'],
             // 要插入的css文件
             css: [],
         }

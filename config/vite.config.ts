@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import react from '@vitejs/plugin-react'
-import {OutputBundle, OutputOptions, Plugin} from 'rollup';
+import {Plugin, RenderedChunk} from 'rollup';
 
 const rootDirName = resolve(__dirname, '../');
 
@@ -15,17 +15,17 @@ export default function ({ mode }) {
       target: 'esnext',
       // 指定输出路径（相对于 项目根目录)
       outDir: 'dist',
-      assetsDir: 'static',
       // 指定生成静态资源的存放路径（相对于 build.outDir）。
+      // assetsDir: 'static',
       rollupOptions: {
         input: {
-          popup: resolve(rootDirName, 'src/page_popup/index.html'),
-          contentScript: resolve(rootDirName, 'src/content-scripts/index.html'),
+          popup: resolve(rootDirName, 'src/popup.html'),
+          contentScript: resolve(rootDirName, 'src/contentScript.html'),
         },
         output: {
-          chunkFileNames: 'static/js/[name].js',
-          entryFileNames: 'static/js/[name].js',
-          assetFileNames: 'static/[ext]/[name].[ext]',
+          chunkFileNames: 'js/[name].js',
+          entryFileNames: 'js/[name].js',
+          assetFileNames: 'assets/[ext]/[name].[ext]',
         }
       },
       // 设置为 {} 则会启用 rollup 的监听器。对于只在构建阶段或者集成流程使用的插件很常用。
@@ -41,11 +41,18 @@ export default function ({ mode }) {
   })
 }
 
+/**
+ * 一个简单的插件，用来将contentScript.js文件中开头的import语句去掉
+ */
 function ClearImportPolyfill(): Plugin {
   return {
     name: 'clear-import-Polyfill',
-    writeBundle(options: OutputOptions, bundle: OutputBundle) {
-      debugger;
+    renderChunk(code: string, chunk: RenderedChunk) {
+      if (chunk.fileName.includes('contentScript.js')) {
+        const reg = /import (\S)*;/
+        return code.replace(reg, '');
+      }
+      return null;
     }
   }
 }
