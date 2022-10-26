@@ -9,7 +9,7 @@ const rootDirName = resolve(__dirname, '../');
 export default function ({ mode }) {
   const isDev = mode === 'development';
   return defineConfig({
-    plugins: [react(), ClearImportPolyfill()],
+    plugins: [react()],
     publicDir: resolve(rootDirName, 'static'),
     build: {
       target: 'esnext',
@@ -44,15 +44,15 @@ export default function ({ mode }) {
 /**
  * 一个简单的插件，用来将contentScript.js文件中开头的import语句去掉
  */
-function ClearImportPolyfill(): Plugin {
-  return {
-    name: 'clear-import-Polyfill',
-    renderChunk(code: string, chunk: RenderedChunk) {
-      if (chunk.fileName.includes('contentScript.js')) {
-        const reg = /import (\S)*;/
-        return code.replace(reg, '');
-      }
-      return null;
-    }
-  }
-}
+// function ClearImportPolyfill(): Plugin {
+//   return {
+//     name: 'clear-import-Polyfill',
+//     renderChunk(code: string, chunk: RenderedChunk) {
+//       if (chunk.fileName.includes('contentScript.js')) {
+//         const reg = /import (\S)*;/
+//         return code.replace(reg, '');
+//       }
+//       return null;
+//     }
+//   }
+// }

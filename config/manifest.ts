@@ -52,13 +52,37 @@ const manifest: chrome.runtime.ManifestV3 = {
             // 反向匹配
             exclude_matches: undefined,
             // 要插入的JavaScript文件
-            js: ['js/modulepreload-polyfill.js', 'js/contentScript.js'],
+            js: ['contentScript-inject.js'],
             // 要插入的css文件
-            css: [],
+            css: ['assets/css/contentScript.css'],
         }
     ],
+    content_security_policy: {
+        extension_pages:  "script-src 'self'; object-src 'self'"
+    },
+    web_accessible_resources: [
+        {
+            resources: [
+                'assets/*',
+                'js/*',
+            ],
+            // URL匹配，哪些URL可以访问这些资源
+            matches: ['<all_urls>'],
+        }
+    ]
 }
 
-const manifestDir = path.resolve(__dirname, '../static/manifest.json');
+const manifestString = JSON.stringify(manifest);
+fs.writeFileSync(path.resolve(__dirname, '../static/manifest.json'), manifestString);
+fs.writeFileSync(path.resolve(__dirname, '../dist/manifest.json'), manifestString);
 
-fs.writeFileSync(manifestDir, JSON.stringify(manifest));
+const script = `
+'use strict';
+const script = document.createElement('script');
+script.setAttribute("type", "module");
+script.setAttribute("src", chrome.runtime.getURL('js/contentScript.js'));
+const head = document.head || document.getElementsByTagName("head")[0] || document.documentElement;
+head.insertBefore(script, head.lastChild);
+`;
+fs.writeFileSync(path.resolve(__dirname, '../static/contentScript-inject.js'), script);
+fs.writeFileSync(path.resolve(__dirname, '../dist/contentScript-inject.js'), script);
