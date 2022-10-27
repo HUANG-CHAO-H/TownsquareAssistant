@@ -65,6 +65,8 @@ const manifest: chrome.runtime.ManifestV3 = {
             resources: [
                 'assets/*',
                 'js/*',
+                'editions.json',
+                'roles.json',
             ],
             // URL匹配，哪些URL可以访问这些资源
             matches: ['<all_urls>'],
@@ -78,6 +80,13 @@ fs.writeFileSync(path.resolve(__dirname, '../dist/manifest.json'), manifestStrin
 
 const script = `
 'use strict';
+
+const span = document.createElement('span');
+span.id = 'townsquare_assistant_url';
+span.style.display = 'none';
+span.innerHTML = chrome.runtime.getURL('/');
+document.body.appendChild(span);
+
 const script = document.createElement('script');
 script.setAttribute("type", "module");
 script.setAttribute("src", chrome.runtime.getURL('js/contentScript.js'));

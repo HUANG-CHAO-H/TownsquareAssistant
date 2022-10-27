@@ -5,6 +5,10 @@ export * from './townsquare';
 import {isDevelopment} from "../utils";
 import {globalContext} from "./globalContext";
 
+export function getIconUrl(iconId: string, type = 'png'): string {
+    return globalContext.baseUrl + `assets/icons/${iconId}.${type}`;
+}
+
 let addIndex = 0;
 const edition = 'tb';
 const roles = [

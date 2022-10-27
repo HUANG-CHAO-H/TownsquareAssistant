@@ -29,6 +29,7 @@ export function PlayerInfo() {
     const tableData = useMemo<ITableRowData[]>(() => {
         const playerData = gameState?.players || [];
         const roleData = roleState?.currentRoles || {};
+        console.info(playerData, roleData);
         return playerData.map(player => ({player, role: roleData[player.role]}));
     }, [gameState?.players, roleState?.currentRoles])
 

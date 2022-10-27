@@ -35,6 +35,7 @@ export function GameRoleProvider(props: {children?: React.ReactNode}) {
     const contextValue = useMemo(() => ({
         allRoles,
         currentRoles
-    }), [allRoles, currentRoles])
+    }), [allRoles, currentRoles]);
+    console.info('GameRoleContext =', contextValue);
     return <GameRoleContext.Provider value={contextValue}>{props.children}</GameRoleContext.Provider>
 }

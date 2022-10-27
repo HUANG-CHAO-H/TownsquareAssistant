@@ -1,7 +1,9 @@
-import {loadRemoteJson, ReactiveData} from "../utils";
-import {EditionsUrl, formatGameEditionInfo, formatGameRoleInfo, formatGameStateJSON, RolesUrl} from "./townsquare";
+import {loadRemoteJson, ReactiveData, sleep} from "../utils";
+import {formatGameEditionInfo, formatGameRoleInfo, formatGameStateJSON} from "./townsquare";
 
 interface IGlobalContext {
+    // base url
+    baseUrl: string,
     // roles.json文件地址
     rolesUrl: string,
     // 角色数据
@@ -33,6 +35,7 @@ interface IGlobalContext {
 }
 
 export const globalContext = ReactiveData<IGlobalContext>({
+    baseUrl: '',
     rolesUrl: '',
     roles: {},
     editionsUrl: '',
@@ -49,6 +52,27 @@ export const globalContext = ReactiveData<IGlobalContext>({
     chatPolling: false,
     chatPollTime: 300,
 });
+
+// 获取插件的baseUrl
+async function getBaseUrl(): Promise<string> {
+    for (let i = 0; i < 10; i++) {
+        const span = document.body.querySelector('#townsquare_assistant_url');
+        if (span) return span.innerHTML
+        await sleep(300);
+    }
+    return '';
+}
+getBaseUrl().then(baseUrl => {
+    if (baseUrl) {
+        console.log('BaseUrl = ', baseUrl);
+        globalContext.baseUrl = baseUrl;
+        globalContext.rolesUrl = baseUrl + 'roles.json';
+        globalContext.editionsUrl = baseUrl + 'editions.json';
+    } else {
+        console.log('BaseUrl获取失败');
+    }
+})
+
 // 关联更新rolesUrl和roles
 globalContext.observe('rolesUrl', async url => {
     if (!url) return globalContext.roles = {};
@@ -84,6 +108,3 @@ globalContext.observe('gameStateString', gameStateString => {
     if (!gameStateString) globalContext.gameState = undefined;
     globalContext.gameState = formatGameStateJSON(gameStateString);
 });
-
-globalContext.rolesUrl = RolesUrl;
-globalContext.editionsUrl = EditionsUrl;
