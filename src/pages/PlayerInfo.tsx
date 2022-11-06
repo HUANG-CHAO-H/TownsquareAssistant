@@ -1,10 +1,11 @@
-import {useGameState} from "../provider/GameStateProvider";
+import React, {useMemo} from "react";
 import {Avatar, Button, Table, Tooltip} from "@douyinfe/semi-ui";
+import {IconComment} from "@douyinfe/semi-icons";
+
+import {useGameState} from "../provider/GameStateProvider";
 import {PlayerAvatar} from "../components/PlayerAvatar";
 import {RoleAvatar} from "../components/RoleAvatar";
-import {IconComment} from "@douyinfe/semi-icons";
-import {openChatWindow} from "../script";
-import React, {useMemo} from "react";
+import { clickPlayerMenu } from "../script";
 import {ReminderAvatar} from "../components/ReminderAvatar";
 import {useRoleState} from "../provider/GameRoleProvider";
 
@@ -23,7 +24,7 @@ interface ITableRowData {
 }
 
 export function PlayerInfo() {
-    const gameState = useGameState();
+    const { gameState } = useGameState() || {};
     const roleState = useRoleState();
 
     const tableData = useMemo<ITableRowData[]>(() => {
@@ -126,7 +127,10 @@ const tableColumns: any[] = [
         align: 'center',
         render(text: string, record: ITableRowData, index: number) {
             return (
-                <Button icon={<IconComment style={{color:'#1abc9c'}}/>} onClick={() => openChatWindow(index + 1)}/>
+                <Button
+                    icon={<IconComment style={{color:'#1abc9c'}}/>}
+                    onClick={() => clickPlayerMenu(index + 1, '私聊')}
+                />
             )
         }
     },

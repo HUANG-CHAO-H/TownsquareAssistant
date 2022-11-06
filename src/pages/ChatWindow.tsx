@@ -30,7 +30,7 @@ export function ChatWindow() {
     const onClickButton = () => {
         if (!chatInput) return;
         globalContext.chatInput = chatInput;
-        sleep(50).then(chatContext.dispatchSendMsg).then(() => setChatInput(''));
+        sleep(50).then(() => chatContext.writeChatMsg()).then(() => setChatInput(''));
     }
     return (
         <div style={containerStyle}>

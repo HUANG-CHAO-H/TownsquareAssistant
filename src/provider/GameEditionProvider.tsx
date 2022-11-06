@@ -21,7 +21,7 @@ export function GameEditionProvider(props: {children?: React.ReactNode}) {
         return () => globalContext.unobserve('editions', setAllEditions);
     }, []);
 
-    const gameState = useGameState();
+    const { gameState } = useGameState() || {};
     useEffect(() => {
         if (!gameState?.edition.id) {
             setEdition(undefined);

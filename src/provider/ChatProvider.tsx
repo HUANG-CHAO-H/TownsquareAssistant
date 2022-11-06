@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {clickChatButton, globalContext, writeChatInput} from "../script";
+import {writeChatMsg, globalContext} from "../script";
 import {useGameState} from "./GameStateProvider";
 import {useRoleState} from "./GameRoleProvider";
 
@@ -13,22 +13,22 @@ export interface IChatContext {
     // 聊天框的标题(用户的username)
     chatTitle: string
     // 聊天框中的信息
-    chatContent: NodeListOf<ChildNode> | null
-    // 触发信息发送功能
-    dispatchSendMsg(): void
+    chatContent: string
+    // 向聊天输入框中写入聊天消息, 并发送
+    writeChatMsg: typeof writeChatMsg;
 }
 
 const ChatContext = React.createContext<IChatContext | undefined>(undefined);
 export function useChatContext() {return useContext(ChatContext)}
 
 export function ChatProvider(props: {children?: React.ReactNode}) {
-    const gameState = useGameState();
+    const { gameState } = useGameState() || {};
     const roleState = useRoleState();
     const [chatPlayer, setChatPlayer] = useState<GamePlayerInfo | undefined>(undefined);
     const [chatRole, setChatRole] = useState<GameRoleInfo | undefined>(undefined);
     const [chatPlayerSeat, setChatPlayerSeat] = useState<number>(0);
     const [chatTitle, setChatTitle] = useState<string>('');
-    const [chatContent, setChatContent] = useState<NodeListOf<ChildNode> | null>(null);
+    const [chatContent, setChatContent] = useState<string>('');
     useEffect(() => {
         setChatTitle(globalContext.chatTitle);
         setChatContent(globalContext.chatContent);
@@ -57,7 +57,7 @@ export function ChatProvider(props: {children?: React.ReactNode}) {
     const contextValue = useMemo<IChatContext>(() => ({
         chatPlayer, chatRole, chatPlayerSeat,
         chatTitle, chatContent,
-        dispatchSendMsg: clickChatButton,
+        writeChatMsg,
     }), [chatPlayer, chatPlayerSeat, chatTitle, chatContent]);
 
     return <ChatContext.Provider value={contextValue}>{props.children}</ChatContext.Provider>

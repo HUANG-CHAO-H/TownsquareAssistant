@@ -24,8 +24,8 @@ interface IGlobalContext {
 
     // 聊天窗口的标题
     chatTitle: string
-    // 聊天内容的DOM拷贝
-    chatContent: NodeListOf<ChildNode> | null
+    // 聊天内容
+    chatContent: string
     // 聊天输入框中的内容
     chatInput: string
     // 是否开启轮询,查询和更新JSON状态
@@ -47,7 +47,7 @@ export const globalContext = ReactiveData<IGlobalContext>({
     statePollTime: 300,
 
     chatTitle: '',
-    chatContent: null,
+    chatContent: '',
     chatInput: '',
     chatPolling: false,
     chatPollTime: 300,
