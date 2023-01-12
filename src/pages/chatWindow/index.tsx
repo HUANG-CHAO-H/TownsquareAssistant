@@ -1,51 +1,40 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useState} from "react";
 import {Row, Col, TextArea, Button, Avatar} from "@douyinfe/semi-ui";
-import {RoleAvatar} from "../components/RoleAvatar";
-import {PlayerAvatar} from "../components/PlayerAvatar";
-import {IChatContext, useChatContext} from "../provider/ChatProvider";
-import {sleep} from "../utils";
-import {globalContext} from "../script";
+import {RoleAvatar} from "../../components/RoleAvatar";
+import {PlayerAvatar} from "../../components/PlayerAvatar";
+import {useChatContent} from "../../hooks/useChatContent";
+import {IChatContext, useChatContext} from "../../provider/ChatProvider";
+import {globalContext} from "../../script";
+import './style.less';
 
 export function ChatWindow() {
     const chatContext = useChatContext();
     const [chatInput, setChatInput] = useState<string>('');
     // 聊天内容展示
-    const divRef = useRef<HTMLDivElement | null>(null);
-    useEffect(() => {
-        const div = divRef.current;
-        if (!div) return;
-        const container: HTMLDivElement = div.firstChild as HTMLDivElement;
-        const oldLength = container.childNodes.length;
-        container.innerHTML = '';
-        if (!chatContext?.chatContent) return;
-        container.append(...chatContext.chatContent);
-        if (oldLength !== container.childNodes.length) {   // 滚动轴修正
-            div.scrollTop = div.scrollHeight;
-        }
-    }, [chatContext?.chatContent])
+    const divRef = useChatContent();
 
     if (!chatContext) return null;
     const {chatPlayer, chatPlayerSeat} = chatContext;
     if (!chatPlayer) return null;
     const onClickButton = () => {
         if (!chatInput) return;
-        globalContext.chatInput = chatInput;
-        sleep(50).then(() => chatContext.writeChatMsg()).then(() => setChatInput(''));
+        globalContext.data.chatInput = chatInput;
+        chatContext.writeChatMsg(chatInput, true).then(() => setChatInput(''));
     }
     return (
-        <div style={containerStyle}>
-            <div style={{display: 'flex'}}>
+        <div className={'assist-chat-window'}>
+            <div className={'chat-window-header'}>
                 <Avatar color="light-blue" shape="square" alt="0">
                     <span style={{fontSize: 'x-large'}}>{chatPlayerSeat}</span>
                 </Avatar>
                 {chatContext.chatRole ? <RoleAvatar roleInfo={chatContext.chatRole} showName={false}/> : null}
                 <PlayerAvatar playerInfo={chatPlayer}/>
             </div>
-            <div style={{margin: '5px 0'}}>{
+            <div className={'chat-window-header'}>{
                 customFunctions.map((Comp, index) => <Comp key={index} setChatInput={setChatInput} chatContext={chatContext}/>)
             }</div>
-            <div ref={divRef} style={contentStyle}><div/></div>
-            <Row gutter={16} type="flex" align="middle">
+            <div ref={divRef} className={'chat-window-body'}><div/></div>
+            <Row type="flex" className={'chat-window-footer'} align="middle">
                 <Col span={20}>
                     <TextArea value={chatInput} onChange={setChatInput} onEnterPress={onClickButton}/>
                 </Col>
@@ -53,25 +42,6 @@ export function ChatWindow() {
             </Row>
         </div>
     )
-}
-
-const containerStyle: React.CSSProperties = {
-    color: 'black',
-    padding: '10px 0',
-    height: '100%',
-    overflow: 'hidden',
-    display: "flex",
-    flexDirection: 'column'
-}
-
-const contentStyle: React.CSSProperties = {
-    overflowX: 'auto',
-    overflowY: 'scroll',
-    borderStyle: "inset",
-    borderWidth: '2px',
-    flexGrow: 1,
-    flexShrink: 1,
-    marginBottom: 5,
 }
 
 interface IButtonProps {

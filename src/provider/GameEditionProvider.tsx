@@ -16,9 +16,9 @@ export function GameEditionProvider(props: {children?: React.ReactNode}) {
     const[allEditions, setAllEditions] = useState<IEditionContext['allEditions']>({});
     const [currentEdition, setEdition] = useState<IEditionContext['currentEdition']>();
     useEffect(() => {
-        setAllEditions(globalContext.editions);
+        setAllEditions(globalContext.data.editions);
         globalContext.observe('editions', setAllEditions);
-        return () => globalContext.unobserve('editions', setAllEditions);
+        return () => globalContext.unObserve('editions', setAllEditions);
     }, []);
 
     const { gameState } = useGameState() || {};

@@ -7,7 +7,7 @@ export * from './globalContext';
 export * from './townsquare';
 
 export function getIconUrl(iconId: string, type = 'png'): string {
-    return globalContext.baseUrl + `assets/icons/${iconId}.${type}`;
+    return globalContext.data.baseUrl + `assets/icons/${iconId}.${type}`;
 }
 
 // 游戏状态JSON轮询
@@ -17,10 +17,10 @@ async function gameStateLoop() {
         await globalContext.wait('statePolling', value => Boolean(value));
         while (true) {
             await controlGameState(json => {
-                globalContext.gameStateString = json
+                globalContext.data.gameStateString = json
             });
-            await sleep(globalContext.statePollTime);
-            if (!globalContext.statePolling) break;
+            await sleep(globalContext.data.statePollTime);
+            if (!globalContext.data.statePolling) break;
         }
         // 关闭对话框
         await closeGameStateDialog();
@@ -34,10 +34,10 @@ async function chatLoop() {
         await globalContext.wait('chatPolling', value => Boolean(value));
         while (true) {
             const { title, content } = readChatInfo();
-            globalContext.chatTitle = title;
-            globalContext.chatContent = content;
-            await sleep(globalContext.chatPollTime);
-            if (!globalContext.chatPolling) break;
+            globalContext.data.chatTitle = title;
+            globalContext.data.chatContent = content;
+            await sleep(globalContext.data.chatPollTime);
+            if (!globalContext.data.chatPolling) break;
         }
     }
 }

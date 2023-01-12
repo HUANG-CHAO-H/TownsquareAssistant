@@ -16,9 +16,9 @@ export function GameRoleProvider(props: {children?: React.ReactNode}) {
     const[allRoles, setAllRoles] = useState<IRoleContext['allRoles']>({});
     const [currentRoles, setCurrentRoles] = useState<IRoleContext['currentRoles']>({});
     useEffect(() => {
-        setAllRoles(globalContext.roles);
+        setAllRoles(globalContext.data.roles);
         globalContext.observe('roles', setAllRoles);
-        return () => globalContext.unobserve('roles', setAllRoles);
+        return () => globalContext.unObserve('roles', setAllRoles);
     }, []);
 
     const editionState = useEditionState();

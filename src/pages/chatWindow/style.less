@@ -1,0 +1,29 @@
+.assist-chat-window {
+  color: black;
+  padding: 10px 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .chat-window-header {
+    display: flex;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-bottom: 5px;
+  }
+
+  .chat-window-body {
+    overflow-x: auto;
+    overflow-y: scroll;
+    border-style: inset;
+    border-width: 2px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-bottom: 5px;
+  }
+  .chat-window-footer {
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+}

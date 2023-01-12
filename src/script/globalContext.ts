@@ -34,7 +34,7 @@ interface IGlobalContext {
     chatPollTime: number
 }
 
-export const globalContext = ReactiveData<IGlobalContext>({
+export const globalContext = new ReactiveData<IGlobalContext>({
     baseUrl: '',
     rolesUrl: '',
     roles: {},
@@ -65,9 +65,9 @@ async function getBaseUrl(): Promise<string> {
 getBaseUrl().then(baseUrl => {
     if (baseUrl) {
         console.log('BaseUrl = ', baseUrl);
-        globalContext.baseUrl = baseUrl;
-        globalContext.rolesUrl = baseUrl + 'roles.json';
-        globalContext.editionsUrl = baseUrl + 'editions.json';
+        globalContext.set('baseUrl', baseUrl);
+        globalContext.set('rolesUrl', baseUrl + 'roles.json');
+        globalContext.set('editionsUrl', baseUrl + 'editions.json');
     } else {
         console.log('BaseUrl获取失败');
     }
@@ -75,8 +75,8 @@ getBaseUrl().then(baseUrl => {
 
 // 关联更新rolesUrl和roles
 globalContext.observe('rolesUrl', async url => {
-    if (!url) return globalContext.roles = {};
-    globalContext.roles = await loadRoles(url);
+    if (!url) return globalContext.set('roles', {});
+    globalContext.set('roles', await loadRoles(url));
 });
 function loadRoles(url: string): Promise<Record<string, GameRoleInfo>> {
     if (!url) return Promise.reject('url为空');
@@ -90,8 +90,8 @@ function loadRoles(url: string): Promise<Record<string, GameRoleInfo>> {
 
 // 关联更新editionsUrl和editions
 globalContext.observe('editionsUrl', async url => {
-    if (!url) return globalContext.editions = {};
-    globalContext.editions = await loadEditions(url);
+    if (!url) return globalContext.set('editions', {});
+    globalContext.set('editions', await loadEditions(url));
 });
 function loadEditions(url: string): Promise<Record<string, GameEditionInfo>> {
     if (!url) return Promise.reject('url为空');
@@ -105,6 +105,6 @@ function loadEditions(url: string): Promise<Record<string, GameEditionInfo>> {
 
 // 关联更新 gameStateString 和 gameState
 globalContext.observe('gameStateString', gameStateString => {
-    if (!gameStateString) globalContext.gameState = undefined;
-    globalContext.gameState = formatGameStateJSON(gameStateString);
+    if (!gameStateString) globalContext.set('gameState', undefined);
+    globalContext.set('gameState', formatGameStateJSON(gameStateString));
 });

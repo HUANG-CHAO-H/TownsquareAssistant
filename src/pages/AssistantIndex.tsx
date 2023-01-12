@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Button, SideSheet, Row, Col} from "@douyinfe/semi-ui";
-import {ChatWindow} from "./ChatWindow";
+import {ChatWindow} from "./chatWindow";
 import {globalContext} from "../script";
 import {GameStateProvider} from "../provider/GameStateProvider";
 import {ChatProvider} from "../provider/ChatProvider";
@@ -15,11 +15,11 @@ export function AssistantIndex() {
 
     useEffect(() => {
         if (visible) {
-            globalContext.statePolling = true;
-            globalContext.chatPolling = true;
+            globalContext.data.statePolling = true;
+            globalContext.data.chatPolling = true;
         } else {
-            globalContext.statePolling = false;
-            globalContext.chatPolling = false;
+            globalContext.data.statePolling = false;
+            globalContext.data.chatPolling = false;
         }
     }, [visible])
 

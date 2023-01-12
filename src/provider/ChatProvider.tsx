@@ -10,10 +10,6 @@ export interface IChatContext {
     chatRole: GameRoleInfo | undefined
     // 当前聊天玩家的座位号(没有玩家时值为0)
     chatPlayerSeat: number
-    // 聊天框的标题(用户的username)
-    chatTitle: string
-    // 聊天框中的信息
-    chatContent: string
     // 向聊天输入框中写入聊天消息, 并发送
     writeChatMsg: typeof writeChatMsg;
 }
@@ -27,38 +23,29 @@ export function ChatProvider(props: {children?: React.ReactNode}) {
     const [chatPlayer, setChatPlayer] = useState<GamePlayerInfo | undefined>(undefined);
     const [chatRole, setChatRole] = useState<GameRoleInfo | undefined>(undefined);
     const [chatPlayerSeat, setChatPlayerSeat] = useState<number>(0);
-    const [chatTitle, setChatTitle] = useState<string>('');
-    const [chatContent, setChatContent] = useState<string>('');
-    useEffect(() => {
-        setChatTitle(globalContext.chatTitle);
-        setChatContent(globalContext.chatContent);
-        globalContext.observe('chatTitle', setChatTitle);
-        globalContext.observe('chatContent', setChatContent);
-        return () => {
-            globalContext.unobserve('chatTitle', setChatTitle);
-            globalContext.unobserve('chatContent', setChatContent);
-        }
-    }, []);
     useEffect(() => {
         if (!gameState) return;
-        const playerSeat = gameState.players.findIndex(value => value.name === chatTitle);
-        if (playerSeat >= 0) {
-            const player = gameState.players[playerSeat];
-            setChatPlayer(player);
-            setChatPlayerSeat(playerSeat + 1);
-            setChatRole(roleState?.currentRoles[player.role])
-        } else {
-            setChatPlayer(undefined);
-            setChatRole(undefined);
-            setChatPlayerSeat(0);
+        const observer = (chatTitle: string) => {
+            const playerSeat = gameState.players.findIndex(value => value.name === chatTitle);
+            if (playerSeat >= 0) {
+                const player = gameState.players[playerSeat];
+                setChatPlayer(player);
+                setChatPlayerSeat(playerSeat + 1);
+                setChatRole(roleState?.currentRoles[player.role])
+            } else {
+                setChatPlayer(undefined);
+                setChatRole(undefined);
+                setChatPlayerSeat(0);
+            }
         }
-    }, [gameState?.players, roleState?.currentRoles, chatTitle]);
+        observer(globalContext.data.chatTitle);
+        globalContext.observe('chatTitle', observer);
+        return () => globalContext.unObserve('chatTitle', observer)
+    }, [gameState?.players, roleState?.currentRoles]);
 
     const contextValue = useMemo<IChatContext>(() => ({
-        chatPlayer, chatRole, chatPlayerSeat,
-        chatTitle, chatContent,
-        writeChatMsg,
-    }), [chatPlayer, chatPlayerSeat, chatTitle, chatContent]);
+        chatPlayer, chatRole, chatPlayerSeat, writeChatMsg,
+    }), [chatPlayer, chatPlayerSeat]);
 
     return <ChatContext.Provider value={contextValue}>{props.children}</ChatContext.Provider>
 }
