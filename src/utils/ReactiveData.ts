@@ -1,59 +1,250 @@
-type Callback<V = unknown> = (value: V) => unknown
-export type IReactiveData<O> = {
-    [K in keyof O]: O[K];
-} & {
-    // 订阅变量值的变化
-    observe: <K extends keyof O>(key: K, callback: Callback<O[K]>) => void
-    // 取消订阅
-    unobserve: <K extends keyof O>(key: K, callback: Callback<O[K]>) => void
-    // 返回一个Promise,每次目标值变化时,都会调用传入的callback,当callback返回true时,Promise被解决
-    wait: <K extends keyof O>(key: K, callback: (value: O[K]) => boolean, maxTime?: number) => Promise<void>
-}
+import { useEffect, useState, useReducer, ReducerWithoutAction } from 'react';
+import { BaseEventEmitter } from './EventEmitter';
 
-export function ReactiveData<O extends Object>(record: O): IReactiveData<O> {
-    // 监听函数集合
-    const listenerMap = new Map<keyof O, Set<Function>>();
-    for (const key of Object.keys(record)) {
-        listenerMap.set(key as keyof O, new Set());
+export class ReactiveData<
+    D extends Record<string, any>,
+> extends BaseEventEmitter<{ [K in keyof D]: (value: D[K]) => void }> {
+    // 真实数据对象
+    protected _realData: D;
+
+    // 代理数据对象
+    protected _proxyData: D;
+
+    // 数据对象的key集合
+    protected readonly _keySet: Set<keyof D>;
+
+    // 是否已经销毁
+    protected _destroy: boolean = false;
+
+    // 获取代理对象
+    get data(): D {
+        return this._proxyData;
     }
-    // 浅拷贝 & 添加三个关键函数
-    const result = Object.assign({}, record) as IReactiveData<O>;
-    result.observe = (key, callback) => {
-        const set = listenerMap.get(key);
-        if (set) set.add(callback);
-        else throw new Error('key is unknown');
+
+    constructor(data: D) {
+        super();
+        // 对传入的数据进行浅拷贝
+        const realData = { ...data };
+        this._realData = realData;
+        // 所有属性key的集合
+        const keyArray: Array<keyof D> = Object.keys(realData);
+        const keySet = new Set<keyof D>(keyArray);
+        this._keySet = keySet;
+        // 生成代理对象
+        this._proxyData = new Proxy(this._realData, {
+            set: <K extends keyof D>(
+                _target: D,
+                p: K | symbol,
+                value: D[K],
+            ): boolean => {
+                if (typeof p === 'symbol' || !keySet.has(p)) {
+                    return false;
+                }
+                this.set(p, value);
+                return true;
+            },
+        });
     }
-    result.unobserve = (key, callback) => {
-        const set = listenerMap.get(key);
-        if (set) set.delete(callback);
-        else throw new Error('key is unknown');
+
+    /**
+     * 销毁, 清空ReactiveData
+     * 1. 并不是真正意义上的完全清空, 只是让代理直接指向了真实对象, 允许读数据
+     * 2. 销毁后observe, 和wait都将无效(wait堵塞的流程将会永远都无法继续向下进行)
+     * 3. 销毁后再调用set, observe和wait将会抛出错误
+     */
+    destroy() {
+        this._destroy = true;
+        this._eventHandlers.clear();
+        this._keySet.clear();
+        this._proxyData = this._realData;
     }
-    result.wait = (key, callback, maxTime) => new Promise<void>((resolve, reject) => {
-        if (callback(result[key])) return resolve();
-        const set = listenerMap.get(key);
-        if (!set) throw new Error('key is unknown');
-        const onceCallback = value => {
-            if (callback(value)) {
-                set.delete(onceCallback);
+
+    // 获取值
+    get<K extends keyof D>(key: K): D[K] {
+        if (this._destroy) {
+            console.error('ReactiveData is destroy');
+        }
+        if (!this._keySet.has(key)) {
+            throw new Error('key is unknown');
+        }
+        return this._realData[key];
+    }
+
+    // 设置值
+    set<K extends keyof D>(key: K, value: D[K]) {
+        if (this._destroy) {
+            throw new Error('ReactiveData is destroy');
+        }
+        if (!this._keySet.has(key)) {
+            throw new Error('key is unknown');
+        }
+        if (this._realData[key] !== value) {
+            this._realData[key] = value;
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            this.dispatch(key, value);
+        }
+    }
+
+    // 订阅某个属性的变化
+    observe<K extends keyof D>(key: K, callback: (value: D[K]) => void) {
+        if (this._destroy) {
+            throw new Error('ReactiveData is destroy');
+        }
+        this.addListener(key, callback);
+    }
+
+    // 取消订阅属性的变化
+    unObserve<K extends keyof D>(key: K, callback: (value: D[K]) => void) {
+        if (this._destroy) {
+            console.error('ReactiveData is destroy');
+        }
+        this.removeListener(key, callback);
+    }
+
+    wait<K extends keyof D>(key: K, callback: (value: D[K]) => boolean) {
+        if (this._destroy) {
+            throw new Error('ReactiveData is destroy');
+        }
+        if (!this._keySet.has(key)) {
+            throw new Error('key is unknown');
+        }
+        return new Promise<void>(resolve => {
+            if (callback(this._realData[key])) {
                 resolve();
+                return;
             }
-        }
-        set.add(onceCallback);
-        if (maxTime) setTimeout(reject, maxTime, 'ReactiveData.wait Error: wait timeout');
-    })
+            const onceCallback = (value: D[K]) => {
+                if (callback(value)) {
+                    this.removeListener(key, onceCallback);
+                    resolve();
+                }
+            };
+            this.addListener(key, onceCallback);
+        });
+    }
 
-    return new Proxy(result, {
-        set(target: typeof result, p: string | symbol, value: any): boolean {
-            if (target[p] === value) return true;
-            if (p === 'observe' || p === 'unobserve' || p === 'wait') return false;
-            const listeners = listenerMap.get(p as any);
-            if (!listeners) return false;
-            target[p] = value;
-            for (let listener of listeners) listener(value);
-            return true;
+    // 将 ReactiveData中的数据转化为React state
+    useState<K extends keyof D>(key: K) {
+        if (this._destroy) {
+            throw new Error('ReactiveData is destroy');
         }
-    })
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const [value, setValue] = useState(this._realData[key]);
+        this.set(key, value);
+        this.addListener(key, setValue);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useEffect(() => () => this.removeListener(key, setValue), [key]);
+        return [value, setValue] as const;
+    }
+
+    /**
+     * 将 ReactiveData中的数据转化为React state
+     * 1. reducer需要满足一个基础要求, 如果调用时没有传入action, 则表达的含义是 set / 覆盖
+     */
+    useReducer<K extends keyof D, R extends ReducerWithoutAction<D[K]>>(
+        key: K,
+        reducer: R,
+    ) {
+        if (this._destroy) {
+            throw new Error('ReactiveData is destroy');
+        }
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const [value, dispatch] = useReducer(reducer, this._realData[key]);
+        this.set(key, value);
+        this.addListener(key, dispatch);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useEffect(() => () => this.removeListener(key, dispatch), [key]);
+        return [value, dispatch] as const;
+    }
 }
+
+// export type IReactiveData<O> = {
+//   [K in keyof O]: O[K];
+// } & {
+//   // 订阅某个属性值的变化
+//   $observe: <K extends keyof O>(
+//     key: K,
+//     callback: (value: O[K]) => void,
+//   ) => void;
+//   // 取消订阅
+//   $unobserve: <K extends keyof O>(
+//     key: K,
+//     callback: (value: O[K]) => void,
+//   ) => void;
+//   // 返回一个Promise,每次目标值变化时,都会调用传入的callback,当callback返回true时,Promise被解决
+//   $wait: <K extends keyof O>(
+//     key: K,
+//     callback: (value: O[K]) => boolean,
+//   ) => Promise<void>;
+// };
+//
+// export function ReactiveData<O>(record: O): IReactiveData<O> {
+//   // 监听函数集合
+//   const listenerMap = new Map<keyof O, Set<(...args: any[]) => any>>();
+//   for (const key of Object.keys(record)) {
+//     listenerMap.set(key as keyof O, new Set());
+//   }
+//   // 浅拷贝 & 添加三个关键函数
+//   const result = { ...record } as IReactiveData<O>;
+//   result.$observe = (key, callback) => {
+//     const set = listenerMap.get(key);
+//     if (set) {
+//       set.add(callback);
+//     } else {
+//       throw new Error('key is unknown');
+//     }
+//   };
+//   result.$unobserve = (key, callback) => {
+//     const set = listenerMap.get(key);
+//     if (set) {
+//       set.delete(callback);
+//     } else {
+//       throw new Error('key is unknown');
+//     }
+//   };
+//   result.$wait = <K extends keyof O>(
+//     key: K,
+//     callback: (value: O[K]) => boolean,
+//   ) =>
+//     new Promise<void>(resolve => {
+//       if (callback(result[key])) {
+//         resolve();
+//         return;
+//       }
+//       const set = listenerMap.get(key);
+//       if (!set) {
+//         throw new Error('key is unknown');
+//       }
+//       const onceCallback = (value: O[K]) => {
+//         if (callback(value)) {
+//           set.delete(onceCallback);
+//           resolve();
+//         }
+//       };
+//       set.add(onceCallback);
+//     });
+//
+//   return new Proxy(result, {
+//     set(target: typeof result, p: string | symbol, value: any): boolean {
+//       if (target[p] === value) {
+//         return true;
+//       }
+//       if (p === '$observe' || p === '$unobserve' || p === '$wait') {
+//         return false;
+//       }
+//       const listeners = listenerMap.get(p as any);
+//       if (!listeners) {
+//         return false;
+//       }
+//       target[p] = value;
+//       for (const listener of listeners) {
+//         listener(value);
+//       }
+//       return true;
+//     },
+//   });
+// }
 
 // 逻辑验证代码
 // const data = {

@@ -1,6 +1,8 @@
 import {HTMLAttributes, RefAttributes, useRef} from "react";
 
 export * from './ReactiveData';
+export * from './EventEmitter';
+export * from './useCacheRef';
 export * from './loadRemoteResource';
 
 export type ReactHTMLAttributes<T> = HTMLAttributes<T> & RefAttributes<T>
