@@ -1,0 +1,8 @@
+{
+  "name": "content-scripts",
+  "private": true,
+  "scripts": {
+    "dev": "vite build --config vite.config.ts --mode development",
+    "build": "vite build --config vite.config.ts"
+  }
+}

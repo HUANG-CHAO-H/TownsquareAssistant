@@ -1,0 +1,8 @@
+{
+  "name": "static",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ts-node static-build.ts"
+  }
+}

@@ -1,7 +1,0 @@
-{
-  "name": "config",
-  "version": "1.0.0",
-  "scripts": {
-    "build-manifest": "ts-node manifest.ts"
-  }
-}
