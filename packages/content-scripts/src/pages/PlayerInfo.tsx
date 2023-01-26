@@ -5,7 +5,7 @@ import {IconComment} from "@douyinfe/semi-icons";
 import {useGameState} from "../provider/GameStateProvider";
 import {PlayerAvatar} from "../components/PlayerAvatar";
 import {RoleAvatar} from "../components/RoleAvatar";
-import { clickPlayerMenu } from "../script";
+import { clickPlayerMenu } from "../adapter";
 import {ReminderAvatar} from "../components/ReminderAvatar";
 import {useRoleState} from "../provider/GameRoleProvider";
 
@@ -30,7 +30,7 @@ export function PlayerInfo() {
     const tableData = useMemo<ITableRowData[]>(() => {
         const playerData = gameState?.players || [];
         const roleData = roleState?.currentRoles || {};
-        console.info(playerData, roleData);
+        // console.info(playerData, roleData);
         return playerData.map(player => ({player, role: roleData[player.role]}));
     }, [gameState?.players, roleState?.currentRoles])
 

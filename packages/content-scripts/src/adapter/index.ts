@@ -2,6 +2,7 @@ import { sleep } from '@/utils'
 import {closeGameStateDialog, controlGameState, readChatInfo} from './webPageAnalysis';
 import globalState from "../globalState";
 import globalEvent from "../globalEvent";
+import './network';
 
 export * from './webPageAnalysis';
 

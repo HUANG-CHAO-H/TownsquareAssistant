@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import {writeChatMsg} from "../script";
+import {writeChatMsg} from "../adapter";
 import {globalState} from '../globalState';
 import {useGameState} from "./GameStateProvider";
 import {useRoleState} from "./GameRoleProvider";

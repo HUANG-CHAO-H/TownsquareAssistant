@@ -1,6 +1,6 @@
 import React, {useCallback, useContext, useEffect, useMemo, useState} from "react";
 import {formatGameStateJSON} from '@/models';
-import {controlGameState} from "../script";
+import {controlGameState} from "../adapter";
 import {globalState} from "../globalState";
 
 interface GameStateContext {

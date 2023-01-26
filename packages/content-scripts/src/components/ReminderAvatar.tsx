@@ -1,6 +1,6 @@
 import {Avatar, Tooltip} from "@douyinfe/semi-ui";
 import React from "react";
-import {getIconUrl} from "../script";
+import {getIconUrl} from "../adapter";
 
 interface ReminderAvatarProps {
     roleId: string

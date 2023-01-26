@@ -3,7 +3,7 @@ import {Avatar, Tag, Card, Descriptions} from "@douyinfe/semi-ui";
 import type {TagColor} from "@douyinfe/semi-ui/tag/interface";
 import {ReactHTMLAttributes} from "@/utils";
 import {translateRoleTeam} from '@/models';
-import {getIconUrl} from "../script";
+import {getIconUrl} from "../adapter";
 import {AvatarCard} from "./AvatarCard";
 
 interface RoleAvatarProps {

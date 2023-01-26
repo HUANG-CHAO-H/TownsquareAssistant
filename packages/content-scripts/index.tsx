@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Dropdown, Button } from '@douyinfe/semi-ui';
 import {AssistantIndex} from "./src/pages/AssistantIndex";
-import {SettingTest, GameStateJsonTest, GameSeatTest, ChatWindowTest} from "./src/script";
+import {SettingTest, GameStateJsonTest, GameSeatTest, ChatWindowTest} from "./src/adapter";
 
 const IS_TEST = false;
 
