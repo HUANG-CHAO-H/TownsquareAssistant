@@ -5,6 +5,11 @@ const path = require('path');
 const rootDir = path.resolve(__dirname, '../../');
 const distDir = path.resolve(rootDir, 'dist');
 
+// 如果不存在dist文件夹, 就创建一个
+if (!fs.existsSync(distDir)) {
+    fs.mkdirSync(distDir);
+}
+
 // 生成 manifest.json文件并写入到dist文件夹;
 const _manifest = require('./script/manifest');
 fs.writeFileSync(path.resolve(distDir, 'manifest.json'), JSON.stringify(_manifest));

@@ -7,6 +7,7 @@
   "scripts": {
     "dev-content-script": "cd packages/content-scripts && yarn run dev",
 
+    "build": "yarn run build-static && yarn run build-content-script",
     "build-static": "cd packages/static && yarn run build",
     "build-content-script": "cd packages/content-scripts && yarn run build"
   },
