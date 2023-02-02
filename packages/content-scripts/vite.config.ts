@@ -40,6 +40,8 @@ export default function ({mode}) {
             minify: isDev ? false : 'esbuild',
             // 启用/禁用 gzip 压缩大小报告。压缩大型输出文件可能会很慢，因此禁用该功能可能会提高大型项目的构建性能。
             reportCompressedSize: !isDev,
+            // 是否生成sourcemap文件
+            sourcemap: isDev ? "inline" : undefined,
         }
     })
 }

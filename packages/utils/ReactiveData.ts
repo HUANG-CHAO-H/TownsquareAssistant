@@ -143,6 +143,17 @@ export class ReactiveData<
         });
     }
 
+    useValue<K extends keyof D>(key: K) {
+        if (this._destroy) {
+            throw new Error('ReactiveData is destroy');
+        }
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const [value, setValue] = useState(this._realData[key]);
+        this.addListener(key, setValue);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useEffect(() => () => this.removeListener(key, setValue), [key]);
+        return value;
+    }
     // 将 ReactiveData中的数据转化为React state
     useState<K extends keyof D>(key: K) {
         if (this._destroy) {

@@ -1,26 +1,36 @@
-import React, {useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Row, Col, TextArea, Button, Avatar} from "@douyinfe/semi-ui";
+import {ChatMessageType} from "../../../../models";
+import {adapterState, chatMsgStore } from "../../adapter";
 import {RoleAvatar} from "../../components/RoleAvatar";
 import {PlayerAvatar} from "../../components/PlayerAvatar";
-import {useChatContent} from "../../hooks/useChatContent";
 import {ChatHelper, useChatContext} from "../../provider/ChatProvider";
-import {adapterState} from "../../adapter";
 import './style.less';
+import {MessageRow} from "./MessageRow";
 
 export function ChatWindow() {
     const chatContext = useChatContext();
+    const [message, setMessage] = useState<ChatMessageType[]>([])
     const [chatInput, setChatInput] = useState<string>('');
-    // 聊天内容展示
-    const divRef = useChatContent();
+    const hostInfo = adapterState.useValue('hostPlayer');
+    const playerId = Number(chatContext.chatPlayer?.id);
+    const staticRef = useRef<Record<string, any>>({});
+    staticRef.current[playerId] = chatInput;
+    useEffect(() => {
+        setChatInput(staticRef.current[playerId] || '');
+        setMessage(chatMsgStore.get(playerId) || []);
+        chatMsgStore.observe(playerId, setMessage);
+        return () => chatMsgStore.unObserve(playerId, setMessage);
+    }, [playerId]);
+    const messageBody = useMemo(
+        () => message.map(m => <MessageRow direction={hostInfo?.id === m.senderUid ? 'right' : 'left'} msg={m} />),
+        [message, hostInfo],
+    )
 
     if (!chatContext) return null;
     const {chatPlayer, chatPlayerSeat} = chatContext;
     if (!chatPlayer) return null;
-    const onClickButton = () => {
-        if (!chatInput) return;
-        adapterState.data.chatInput = chatInput;
-        chatContext.sendMessage(chatInput, true).then(() => setChatInput(''));
-    }
+    const onClickButton = () => chatInput && chatContext.sendMessage(chatInput, true).then(() => setChatInput(''));
     return (
         <div className={'assist-chat-window'}>
             <div className={'chat-window-header'}>
@@ -33,7 +43,7 @@ export function ChatWindow() {
             <div className={'chat-window-header'}>{
                 customFunctions.map((Comp, index) => <Comp key={index} setChatInput={setChatInput} chatContext={chatContext}/>)
             }</div>
-            <div ref={divRef} className={'chat-window-body'}><div/></div>
+            <div className={'chat-window-body'}>{messageBody}</div>
             <Row type="flex" className={'chat-window-footer'} align="middle">
                 <Col span={20}>
                     <TextArea value={chatInput} onChange={setChatInput} onEnterPress={onClickButton}/>

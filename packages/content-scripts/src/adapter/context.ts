@@ -67,17 +67,6 @@ export const adapterState = new ReactiveData<IAdapterState>({
     chatInput: '',
 });
 
-// 获取插件的baseUrl
-(async function () {
-    while (!adapterState.get('baseUrl')) {
-        const span = document.querySelector('#townsquare_assistant_url');
-        if (span) {
-            adapterState.set('baseUrl', span.innerHTML);
-            continue;
-        }
-        await sleep(1000);
-    }
-})();
 // 拉取角色和剧本数据
 adapterState.observe('baseUrl', url => {
     if (!url) {
@@ -113,5 +102,17 @@ adapterEvent.addListener('clockTower_msg', msg => {
         adapterState.set('hostPlayer', host);
     }
 });
+
+// 获取插件的baseUrl
+(async function () {
+    while (!adapterState.get('baseUrl')) {
+        const span = document.querySelector('#townsquare_assistant_url');
+        if (span) {
+            adapterState.set('baseUrl', span.innerHTML);
+            continue;
+        }
+        await sleep(1000);
+    }
+})();
 
 adapterEvent.addListener('clockTower_msg', msg => console.info('clockTower_msg', msg));

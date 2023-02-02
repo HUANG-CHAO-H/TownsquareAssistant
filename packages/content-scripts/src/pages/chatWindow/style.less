@@ -26,4 +26,27 @@
     flex-grow: 0;
     flex-shrink: 0;
   }
+  .chat-message-row {
+    display: flex;
+    align-items: flex-start;
+    margin: 10px;
+    .chat-message-avatar {
+      width: 32px;
+      height: 32px;
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
+    .chat-message-content {
+      flex-grow: 1;
+      flex-shrink: 1;
+      padding: 0 10px;
+      & > div:last-child {
+        border-radius: 9999px;
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #e9ecec;
+        text-align: left;
+      }
+    }
+  }
 }
