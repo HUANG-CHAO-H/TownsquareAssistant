@@ -1,5 +1,5 @@
 import {useEffect, useRef} from "react";
-import {globalState} from "../globalState";
+import {adapterState} from "../adapter";
 
 /**
  * 将聊天文本数据append到一个div中去（需要不受react监控）
@@ -28,13 +28,13 @@ export function useChatContent() {
         }
         let interval: NodeJS.Timer | undefined = setInterval(() => {
             if (!divRef.current) return;
-            observer(globalState.data.chatContent);
+            observer(adapterState.data.chatContent);
             if (interval !== undefined) clearInterval(interval);
             interval = undefined;
         }, 100);
-        globalState.observe('chatContent', observer)
+        adapterState.observe('chatContent', observer)
         return () => {
-            globalState.unObserve('chatContent', observer);
+            adapterState.unObserve('chatContent', observer);
             if (interval !== undefined) clearInterval(interval);
             interval = undefined;
         }

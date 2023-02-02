@@ -60,6 +60,15 @@ const menuList = [
     '提名',
     '私聊',
 ] as const;
+const emptyMenuList = [
+    '改人称代词',
+    '改名',
+    '移动玩家',
+    '换座',
+    '移除该座位',
+    '提名',
+    '私聊',
+] as const;
 export type PlayerMenuOption = (typeof menuList)[number];
 // 切换玩家菜单的出现与消失
 function changePlayerMenu(player: HTMLDivElement) {
@@ -69,7 +78,7 @@ function changePlayerMenu(player: HTMLDivElement) {
 }
 // 点击玩家菜单中的某个选项
 export async function clickPlayerMenu<O extends PlayerMenuOption>(seatNumber: number, option: O) {
-    const optionIndex = menuList.findIndex(o => o === option);
+    let optionIndex = menuList.findIndex(o => o === option);
     if (optionIndex === -1) throw new Error('clickPlayerMenu: 菜单选项不符合预期: ' + option);
     const player = getSeatPlayer(seatNumber);
     for (let i = 0; i < 3; i++) {
@@ -79,7 +88,10 @@ export async function clickPlayerMenu<O extends PlayerMenuOption>(seatNumber: nu
             await sleep(50);
             continue;
         }
-        if (menuUl.children.length !== menuList.length) {
+        if (menuUl.children.length === menuList.length) {
+        } else if (menuUl.children.length === emptyMenuList.length) {
+            optionIndex = emptyMenuList.findIndex(o => o === option);
+        } else {
             console.warn('clickPlayerMenu: 未找到目标菜单选项');
             return;
         }

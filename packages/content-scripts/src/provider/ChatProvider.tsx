@@ -1,52 +1,48 @@
-import React, {useContext, useEffect, useMemo, useState} from "react";
-import {writeChatMsg} from "../adapter";
-import {globalState} from '../globalState';
+import React, {useContext, useEffect, useState} from "react";
+import {writeChatMsg, adapterState } from "../adapter";
 import {useGameState} from "./GameStateProvider";
 import {useRoleState} from "./GameRoleProvider";
 
-export interface IChatContext {
-    // 处于当前聊天框的玩家信息
-    chatPlayer: GamePlayerInfo | undefined
-    // 当前聊天玩家的角色
-    chatRole: GameRoleInfo | undefined
-    // 当前聊天玩家的座位号(没有玩家时值为0)
-    chatPlayerSeat: number
-    // 向聊天输入框中写入聊天消息, 并发送
-    writeChatMsg: typeof writeChatMsg;
+export class ChatHelper {
+    /**
+     * @param chatPlayer        处于当前聊天框的玩家信息
+     * @param chatRole          当前聊天玩家的角色
+     * @param chatPlayerSeat    当前聊天玩家的座位号(没有玩家时值为0)
+     */
+    constructor(
+        readonly chatPlayer: GamePlayerInfo | undefined,
+        readonly chatRole: GameRoleInfo | undefined,
+        readonly chatPlayerSeat: number,
+    ) {}
+
+    sendMessage(message: string | undefined = undefined, autoSend: boolean = true): Promise<boolean> {
+        return writeChatMsg(message, autoSend);
+    }
 }
 
-const ChatContext = React.createContext<IChatContext | undefined>(undefined);
+export const defaultValue = new ChatHelper(undefined, undefined, 0);
+const ChatContext = React.createContext<ChatHelper>(defaultValue);
 export function useChatContext() {return useContext(ChatContext)}
 
 export function ChatProvider(props: {children?: React.ReactNode}) {
-    const { gameState } = useGameState() || {};
+    const [contextValue, setContextValue] = useState(defaultValue);
+    const { gameState } = useGameState();
     const roleState = useRoleState();
-    const [chatPlayer, setChatPlayer] = useState<GamePlayerInfo | undefined>(undefined);
-    const [chatRole, setChatRole] = useState<GameRoleInfo | undefined>(undefined);
-    const [chatPlayerSeat, setChatPlayerSeat] = useState<number>(0);
     useEffect(() => {
-        if (!gameState) return;
+        if (!gameState) return void setContextValue(defaultValue);
         const observer = (chatTitle: string) => {
             const playerSeat = gameState.players.findIndex(value => value.name === chatTitle);
             if (playerSeat >= 0) {
                 const player = gameState.players[playerSeat];
-                setChatPlayer(player);
-                setChatPlayerSeat(playerSeat + 1);
-                setChatRole(roleState?.currentRoles[player.role])
+                setContextValue(new ChatHelper(player, roleState.currentRoles[player.role], playerSeat + 1));
             } else {
-                setChatPlayer(undefined);
-                setChatRole(undefined);
-                setChatPlayerSeat(0);
+                setContextValue(defaultValue);
             }
         }
-        observer(globalState.data.chatTitle);
-        globalState.observe('chatTitle', observer);
-        return () => globalState.unObserve('chatTitle', observer)
+        observer(adapterState.data.chatTitle);
+        adapterState.observe('chatTitle', observer);
+        return () => adapterState.unObserve('chatTitle', observer)
     }, [gameState?.players, roleState?.currentRoles]);
-
-    const contextValue = useMemo<IChatContext>(() => ({
-        chatPlayer, chatRole, chatPlayerSeat, writeChatMsg,
-    }), [chatPlayer, chatPlayerSeat]);
 
     return <ChatContext.Provider value={contextValue}>{props.children}</ChatContext.Provider>
 }

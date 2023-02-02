@@ -1,38 +1,49 @@
-import React, {useContext, useEffect, useMemo, useState} from "react";
-import {globalState} from '../globalState';
+import React, {useContext, useEffect, useState} from "react";
+import {adapterState} from '../adapter';
 import {useGameState} from "./GameStateProvider";
 
-export interface IEditionContext {
-    // 整个游戏的所有剧本
-    allEditions: Record<string, GameEditionInfo>
-    // 当前剧本
-    currentEdition: GameEditionInfo | undefined
+export class GameEditionHelper {
+    /**
+     * @param allEditions 整个游戏的所有剧本
+     * @param currentEdition 当前剧本
+     */
+    constructor(
+        readonly allEditions: Record<string, GameEditionInfo>,
+        readonly currentEdition: GameEditionInfo | undefined,
+    ) {}
+
+    static setAllEditions(oldV: GameEditionHelper, allEditions: Record<string, GameEditionInfo>): GameEditionHelper {
+        if (oldV.allEditions === allEditions) return oldV;
+        return new GameEditionHelper(allEditions, oldV.currentEdition);
+    }
+    static setCurrentEdition(oldV: GameEditionHelper, currentEdition: GameEditionInfo | undefined): GameEditionHelper {
+        if (oldV.currentEdition === currentEdition) return oldV;
+        return new GameEditionHelper(oldV.allEditions, currentEdition);
+    }
 }
 
-const GameEditionContext = React.createContext<IEditionContext | undefined>(undefined)
-export function useEditionState() {return useContext(GameEditionContext)}
+export const defaultValue = new GameEditionHelper({}, undefined);
+export const GameEditionContext = React.createContext<GameEditionHelper>(defaultValue)
+export const useEditionState = () => useContext(GameEditionContext);
 
 export function GameEditionProvider(props: {children?: React.ReactNode}) {
-    const[allEditions, setAllEditions] = useState<IEditionContext['allEditions']>({});
-    const [currentEdition, setEdition] = useState<IEditionContext['currentEdition']>();
+    const [contextValue, setContextValue] = useState(defaultValue);
     useEffect(() => {
-        setAllEditions(globalState.data.editions);
-        globalState.observe('editions', setAllEditions);
-        return () => globalState.unObserve('editions', setAllEditions);
+        const handler = (value: Record<string, GameEditionInfo>) => {
+            setContextValue(v => GameEditionHelper.setAllEditions(v, value))
+        }
+        handler(adapterState.data.editions);
+        adapterState.observe('editions', handler);
+        return () => adapterState.unObserve('editions', handler);
     }, []);
 
-    const { gameState } = useGameState() || {};
+    const { gameState } = useGameState();
+    const editionId = gameState?.edition.id;
     useEffect(() => {
-        if (!gameState?.edition.id) {
-            setEdition(undefined);
-            return;
+        const currentEdition = contextValue.allEditions[editionId || ''];
+        if (currentEdition !== contextValue.currentEdition) {
+            setContextValue(new GameEditionHelper(contextValue.allEditions, currentEdition));
         }
-        setEdition(allEditions[gameState.edition.id]);
-    }, [allEditions, gameState?.edition])
-
-    const contextValue = useMemo(() => ({
-        allEditions,
-        currentEdition
-    }), [allEditions, currentEdition]);
+    }, [contextValue.allEditions, editionId]);
     return <GameEditionContext.Provider value={contextValue}>{props.children}</GameEditionContext.Provider>
 }

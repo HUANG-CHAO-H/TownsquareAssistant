@@ -1,5 +1,7 @@
-import { useEffect, useState, useReducer, ReducerWithoutAction } from 'react';
-import { BaseEventEmitter } from './EventEmitter';
+import {ReducerWithoutAction, useEffect, useReducer, useState} from 'react';
+import {BaseEventEmitter} from './EventEmitter';
+
+export type AllChangeListener<D extends Record<string, any>> = <K extends keyof D>(key: K, value: D[K]) => void;
 
 export class ReactiveData<
     D extends Record<string, any>,
@@ -13,23 +15,28 @@ export class ReactiveData<
     // 数据对象的key集合
     protected readonly _keySet: Set<keyof D>;
 
+    // 是否冻结该对象，不允许修改或设置 data 中不包含的属性
+    private readonly _freeze: boolean;
+
     // 是否已经销毁
     protected _destroy: boolean = false;
+
+    // 监听所有变化的listener
+    protected allChangeListenerSet = new Set<AllChangeListener<D>>();
 
     // 获取代理对象
     get data(): D {
         return this._proxyData;
     }
 
-    constructor(data: D) {
+    constructor(data: D, freeze = true) {
         super();
+        this._freeze = freeze;
         // 对传入的数据进行浅拷贝
         const realData = { ...data };
         this._realData = realData;
         // 所有属性key的集合
-        const keyArray: Array<keyof D> = Object.keys(realData);
-        const keySet = new Set<keyof D>(keyArray);
-        this._keySet = keySet;
+        this._keySet = new Set<keyof D>(Object.keys(realData));
         // 生成代理对象
         this._proxyData = new Proxy(this._realData, {
             set: <K extends keyof D>(
@@ -37,9 +44,8 @@ export class ReactiveData<
                 p: K | symbol,
                 value: D[K],
             ): boolean => {
-                if (typeof p === 'symbol' || !keySet.has(p)) {
-                    return false;
-                }
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 this.set(p, value);
                 return true;
             },
@@ -64,9 +70,6 @@ export class ReactiveData<
         if (this._destroy) {
             console.error('ReactiveData is destroy');
         }
-        if (!this._keySet.has(key)) {
-            throw new Error('key is unknown');
-        }
         return this._realData[key];
     }
 
@@ -75,7 +78,7 @@ export class ReactiveData<
         if (this._destroy) {
             throw new Error('ReactiveData is destroy');
         }
-        if (!this._keySet.has(key)) {
+        if (typeof key === 'symbol' || (this._freeze && !this._keySet.has(key))) {
             throw new Error('key is unknown');
         }
         if (this._realData[key] !== value) {
@@ -83,6 +86,9 @@ export class ReactiveData<
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             this.dispatch(key, value);
+            for (const fn of this.allChangeListenerSet) {
+                fn(key, value);
+            }
         }
     }
 
@@ -102,12 +108,25 @@ export class ReactiveData<
         this.removeListener(key, callback);
     }
 
-    wait<K extends keyof D>(key: K, callback: (value: D[K]) => boolean) {
+    // 添加监听所有值变化的函数
+    observeAllChange(listener: AllChangeListener<D>) {
         if (this._destroy) {
             throw new Error('ReactiveData is destroy');
         }
-        if (!this._keySet.has(key)) {
-            throw new Error('key is unknown');
+        this.allChangeListenerSet.add(listener);
+    }
+
+    // 移除监听所有值变化的函数
+    unObserveAllChange(listener: AllChangeListener<D>) {
+        if (this._destroy) {
+            console.error('ReactiveData is destroy');
+        }
+        this.allChangeListenerSet.delete(listener);
+    }
+
+    wait<K extends keyof D>(key: K, callback: (value: D[K]) => boolean) {
+        if (this._destroy) {
+            throw new Error('ReactiveData is destroy');
         }
         return new Promise<void>(resolve => {
             if (callback(this._realData[key])) {

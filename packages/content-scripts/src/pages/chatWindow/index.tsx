@@ -3,8 +3,8 @@ import {Row, Col, TextArea, Button, Avatar} from "@douyinfe/semi-ui";
 import {RoleAvatar} from "../../components/RoleAvatar";
 import {PlayerAvatar} from "../../components/PlayerAvatar";
 import {useChatContent} from "../../hooks/useChatContent";
-import {IChatContext, useChatContext} from "../../provider/ChatProvider";
-import {globalState} from "../../globalState";
+import {ChatHelper, useChatContext} from "../../provider/ChatProvider";
+import {adapterState} from "../../adapter";
 import './style.less';
 
 export function ChatWindow() {
@@ -18,8 +18,8 @@ export function ChatWindow() {
     if (!chatPlayer) return null;
     const onClickButton = () => {
         if (!chatInput) return;
-        globalState.data.chatInput = chatInput;
-        chatContext.writeChatMsg(chatInput, true).then(() => setChatInput(''));
+        adapterState.data.chatInput = chatInput;
+        chatContext.sendMessage(chatInput, true).then(() => setChatInput(''));
     }
     return (
         <div className={'assist-chat-window'}>
@@ -48,7 +48,7 @@ interface IButtonProps {
     // 修改聊天输入框中的内容
     setChatInput: React.Dispatch<React.SetStateAction<string>>
     // context的值
-    chatContext: IChatContext | undefined
+    chatContext: ChatHelper | undefined
 }
 
 // 自定义功能列表

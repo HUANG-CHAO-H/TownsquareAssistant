@@ -1,5 +1,6 @@
-import {decodeUint8ArrayMsg} from "@/models";
-import globalEvent from "../globalEvent";
+import { adapterEvent } from './context';
+import { decodeUint8ArrayMsg, formatChatMessage } from "../../../models";
+import {tryToParseJson} from "../../../utils";
 
 // http网络请求劫持与监听
 const _open = XMLHttpRequest.prototype.open;
@@ -15,12 +16,22 @@ XMLHttpRequest.prototype.send = function (body) {
     const method = this[symbol_method] || '';
     const url = this[symbol_url] || '';
     this.addEventListener('load', function () {
-        globalEvent.dispatch('http_request', {
+        adapterEvent.dispatch('http_request', {
             method,
             url,
             requestBody: body || null,
             responseBody: this.response,
         });
+        if (url.includes('message/v2/messages')) {
+            const msgArray = tryToParseJson(this.response as any)?.data?.list || [];
+            if (!(msgArray instanceof Array)) {
+                console.error('[助手]: message/v2/messages 接口的返回体接口超出预期, 无法解析', body);
+                return;
+            }
+            for (const msg of msgArray) {
+                adapterEvent.dispatch('chat_msg', formatChatMessage(msg));
+            }
+        }
     });
     return _send.apply(this, arguments as any);
 }
@@ -35,9 +46,9 @@ const interval = setInterval(() => {
         const msg = decodeUint8ArrayMsg(data);
         for (const m of msg) {
             if (m.baseType === 'chat') {
-                globalEvent.dispatch('ws_chat_msg', m.msg);
+                adapterEvent.dispatch('chat_msg', m.msg);
             } else if (m.baseType === 'clockTower') {
-                globalEvent.dispatch('ws_clockTower_msg', m.msg);
+                adapterEvent.dispatch('clockTower_msg', m.msg);
             }
         }
     });

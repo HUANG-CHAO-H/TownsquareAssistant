@@ -23,25 +23,22 @@ function getChatSendButton(chatDiv: HTMLDivElement): HTMLDivElement | null {
 }
 
 // 读取聊天信息
-export function readChatInfo() {
+export function readChatInfo(): { title: string, content: string, input: string } {
     const chatContainer = getChatDetailContainer();
     if (!chatContainer) {
         return {
             title: '',
             content: '',
+            input: '',
         }
     }
     const titleDiv = getChatTitleDiv(chatContainer);
     const contentDiv = getChatContentDiv(chatContainer);
-    if (!titleDiv || !contentDiv) {
-        return {
-            title: '',
-            content: '',
-        }
-    }
+    const inputDiv = getChatInputDiv(chatContainer);
     return {
-        title: titleDiv.innerText || '',
-        content: contentDiv.innerText || '',
+        title: titleDiv?.innerText || '',
+        content: contentDiv?.innerText || '',
+        input: inputDiv?.innerText || '',
     }
 }
 // 读取聊天输入框中的内容

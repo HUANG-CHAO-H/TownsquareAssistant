@@ -55,6 +55,33 @@ export interface ChatMessageType {
     toUsingNftAvatar: number;
 }
 
+export function formatChatMessage(msg: Record<string, any>): ChatMessageType {
+    return {
+        id: Number(msg.id),
+        chatMsgType: Number(msg.chatMsgType),
+        content: String(msg.content || ''),
+        createTime: Number(msg.createTime),
+        conversationId: Number(msg.conversationId),
+        identity: Number(msg.identity),
+        relatedId: Number(msg.relatedId),
+        tk: String(msg.tk || ''),
+        senderAuditAvatarUrl: String(msg.senderAuditAvatarUrl || ''),
+        senderAuditNickName: String(msg.senderAuditNickName || ''),
+        senderAuthType: Number(msg.senderAuthType),
+        senderAvatarUrl: String(msg.senderAvatarUrl || ''),
+        senderBot: Number(msg.senderBot),
+        senderNickname: String(msg.senderNickname || ''),
+        senderUid: Number(msg.senderUid),
+        senderUsingNftAvatar: Number(msg.senderUsingNftAvatar),
+        toAuthType: Number(msg.toAuthType),
+        toAvatarUrl: String(msg.toAvatarUrl || ''),
+        toBot: Number(msg.toBot),
+        toNickName: String(msg.toNickName || ''),
+        toUid: Number(msg.toUid),
+        toUsingNftAvatar: Number(msg.toUsingNftAvatar),
+    }
+}
+
 // ws接收到的原始消息
 export interface BaseWsMessage {
     baseType: BaseMessageType;
@@ -87,11 +114,13 @@ export function decodeUint8ArrayMsg(data: Uint8Array): WsMessage[] {
     }
     for (const item of parseData) {
         let baseType: WsMessage['baseType'];
+        let message = (item.msg && typeof item.msg === 'object') ? item.msg : JSON.parse(item.msg || '[]');
         if (item.baseType === BaseMessageType.kky) {
             if (item.subType !== SubMessageType.chat) {
                 continue;
             }
             baseType = 'chat';
+            message = formatChatMessage(message);
         } else if (item.baseType === BaseMessageType.clockTower) {
             if (item.subType !== 1) {
                 continue;
@@ -100,10 +129,7 @@ export function decodeUint8ArrayMsg(data: Uint8Array): WsMessage[] {
         } else {
             continue;
         }
-        msg.push({
-            baseType,
-            msg: (item.msg && typeof item.msg === 'object') ? item.msg : JSON.parse(item.msg || '[]'),
-        });
+        msg.push({ baseType, msg: message });
     }
     return msg;
 }

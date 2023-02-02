@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Button, SideSheet, Row, Col} from "@douyinfe/semi-ui";
 import {ChatWindow} from "./chatWindow";
-import {globalState} from "../globalState";
+import {adapterState} from "../adapter";
 import {GameStateProvider} from "../provider/GameStateProvider";
 import {ChatProvider} from "../provider/ChatProvider";
 import {SizeProvider} from "../provider/SizeProvider";
@@ -13,15 +13,7 @@ export function AssistantIndex() {
     const [visible, setVisible] = useState(false);
     const changeVisible = useCallback(() => setVisible(v => !v), []);
 
-    useEffect(() => {
-        if (visible) {
-            globalState.data.statePolling = true;
-            globalState.data.chatPolling = true;
-        } else {
-            globalState.data.statePolling = false;
-            globalState.data.chatPolling = false;
-        }
-    }, [visible])
+    useEffect(() => adapterState.set('statePolling', visible), [visible])
 
     return (<>
         <Button theme='solid' type='secondary' onClick={changeVisible} style={buttonStyle}>助手</Button>

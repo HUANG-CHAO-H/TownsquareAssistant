@@ -1,5 +1,5 @@
-import {Avatar, Tooltip} from "@douyinfe/semi-ui";
 import React from "react";
+import {Avatar, Tooltip} from "@douyinfe/semi-ui";
 import {getIconUrl} from "../adapter";
 
 interface ReminderAvatarProps {

@@ -1,6 +1,6 @@
 export interface GamePlayerInfo {
     // 玩家ID
-    id: string;
+    id: number;
     // 玩家name，如果座位上没有玩家则这里将填充座位号
     name: string;
     // 人称代词（自定义昵称）
@@ -31,17 +31,17 @@ export function formatGamePlayerInfo(playerInfo: string | GamePlayerInfo): GameP
     if (typeof playerInfo === 'string') {
         playerInfo = JSON.parse(playerInfo) as GamePlayerInfo;
     }
-    playerInfo.id = playerInfo.id || '';
-    playerInfo.name = String(playerInfo.name) || '';
-    playerInfo.pronouns = playerInfo.pronouns || '';
-    playerInfo.avatarUrl = playerInfo.avatarUrl || '';
-    playerInfo.role = playerInfo.role || '';
-    playerInfo.countUnread = playerInfo.countUnread || 0;
-    playerInfo.isDead = playerInfo.isDead || false;
-    playerInfo.isMute = playerInfo.isMute || false;
-    playerInfo.isOpenMic = playerInfo.isOpenMic || false;
-    playerInfo.isTalking = playerInfo.isTalking || false;
-    playerInfo.isVoteless = playerInfo.isVoteless || false;
+    playerInfo.id = Number(playerInfo.id);
+    playerInfo.name = String(playerInfo.name ?? '');
+    playerInfo.pronouns = String(playerInfo.pronouns ?? '');
+    playerInfo.avatarUrl = String(playerInfo.avatarUrl ?? '');
+    playerInfo.role = String(playerInfo.role ?? '');
+    playerInfo.countUnread = Number(playerInfo.countUnread || 0);
+    playerInfo.isDead = Boolean(playerInfo.isDead);
+    playerInfo.isMute = Boolean(playerInfo.isMute);
+    playerInfo.isOpenMic = Boolean(playerInfo.isOpenMic);
+    playerInfo.isTalking = Boolean(playerInfo.isTalking)
+    playerInfo.isVoteless = Boolean(playerInfo.isVoteless);
     playerInfo.reminders = playerInfo.reminders || [];
     return playerInfo;
 }

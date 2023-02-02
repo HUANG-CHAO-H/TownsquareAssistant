@@ -1,6 +1,7 @@
 import React from "react";
 import {Avatar, Badge, Card, Tag, Descriptions} from "@douyinfe/semi-ui";
 import {ReactHTMLAttributes} from "@/utils";
+import {} from '@/models';
 import {AvatarCard} from "./AvatarCard";
 
 interface PlayerAvatarProps {

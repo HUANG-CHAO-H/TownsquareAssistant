@@ -1,40 +1,53 @@
-import React, {useContext, useEffect, useMemo, useState} from "react";
-import {globalState} from "../globalState";
+import React, {useContext, useEffect, useState} from "react";
+import {adapterState} from "../adapter";
 import {useEditionState} from "./GameEditionProvider";
 
-export interface IRoleContext {
-    // 整个游戏的所有角色（不仅仅是当前剧本中的角色，也包含其它剧本的）
-    allRoles: Record<string, GameRoleInfo>
-    // 当前剧本中的角色
-    currentRoles: Record<string, GameRoleInfo>
-}
+export class GameRoleHelper {
+    /**
+     *
+     * @param allRoles      整个游戏的所有角色（不仅仅是当前剧本中的角色，也包含其它剧本的）
+     * @param currentRoles  当前剧本中的角色
+     */
+    constructor(
+        readonly allRoles: Record<string, GameRoleInfo>,
+        readonly currentRoles: Record<string, GameRoleInfo>,
+    ) {}
 
-const GameRoleContext = React.createContext<IRoleContext | undefined>(undefined)
-export function useRoleState() {return useContext(GameRoleContext)}
+    static setAllRoles(oldV: GameRoleHelper, allRoles: Record<string, GameRoleInfo>): GameRoleHelper {
+        if (oldV.allRoles === allRoles) return oldV;
+        return new GameRoleHelper(allRoles, oldV.currentRoles);
+    }
+    static setCurrentRoles(oldV: GameRoleHelper, currentRoles: Record<string, GameRoleInfo>): GameRoleHelper {
+        if (oldV.currentRoles === currentRoles) return oldV;
+        return new GameRoleHelper(oldV.allRoles, currentRoles);
+    }
+}
+export const defaultValue = new GameRoleHelper({}, {});
+export const GameRoleContext = React.createContext<GameRoleHelper>(defaultValue);
+export const useRoleState = () => useContext(GameRoleContext);
 
 export function GameRoleProvider(props: {children?: React.ReactNode}) {
-    const[allRoles, setAllRoles] = useState<IRoleContext['allRoles']>({});
-    const [currentRoles, setCurrentRoles] = useState<IRoleContext['currentRoles']>({});
+    const [contextValue, setContextValue] = useState(defaultValue);
     useEffect(() => {
-        setAllRoles(globalState.data.roles);
-        globalState.observe('roles', setAllRoles);
-        return () => globalState.unObserve('roles', setAllRoles);
+        const handler = (value: Record<string, GameRoleInfo>) => {
+            setContextValue(v => GameRoleHelper.setAllRoles(v, value));
+        }
+        handler(adapterState.data.roles);
+        adapterState.observe('roles', handler);
+        return () => adapterState.unObserve('roles', handler);
     }, []);
 
-    const editionState = useEditionState();
+    const { currentEdition } = useEditionState();
     useEffect(() => {
-        if (!editionState?.currentEdition) return;
-        const roles = editionState.currentEdition.roles;
-        const _currentUsers: IRoleContext['currentRoles'] = {};
-        for (const role of roles) {
-            if (allRoles[role]) _currentUsers[role] = allRoles[role];
+        if (!currentEdition?.roles?.length || !Object.keys(contextValue.allRoles)) {
+            setContextValue(GameRoleHelper.setCurrentRoles(contextValue, defaultValue.currentRoles));
+            return;
         }
-        setCurrentRoles(_currentUsers);
-    }, [allRoles, editionState?.currentEdition])
-
-    const contextValue = useMemo(() => ({
-        allRoles,
-        currentRoles
-    }), [allRoles, currentRoles]);
+        const _currentUsers: Record<string, GameRoleInfo> = {};
+        for (const role of currentEdition.roles) {
+            if (contextValue.allRoles[role]) _currentUsers[role] = contextValue.allRoles[role];
+        }
+        setContextValue(new GameRoleHelper(contextValue.allRoles, _currentUsers));
+    }, [contextValue.allRoles, currentEdition])
     return <GameRoleContext.Provider value={contextValue}>{props.children}</GameRoleContext.Provider>
 }
