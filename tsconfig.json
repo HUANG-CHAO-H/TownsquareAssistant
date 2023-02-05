@@ -16,12 +16,18 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "typeRoots": [
+      "node_modules/@types",
+      "packages/models/index.ts",
+      "typings.d.ts",
+    ],
     "baseUrl": ".",
     "paths": {
       "@/*": ["packages/*"]
     }
   },
   "include": [
-    "packages/*"
+    "packages/*",
+    "typings.d.ts",
   ]
 }

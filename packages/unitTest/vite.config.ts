@@ -1,25 +1,29 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import getGlobalConfig, { Props } from '../../vite.config';
+import react from "@vitejs/plugin-react";
 
 const path_root = resolve(__dirname, '../../');
 const path_packages = resolve(path_root, 'packages');
 
 
 // https://vitejs.dev/config/
-export default function (props: Props) {
-    const isDev = props.mode === 'development';
-    const defaultConfig = getGlobalConfig(props);
+export default function ({mode}) {
+    const isDev = mode === 'development';
     return defineConfig({
-        ...defaultConfig,
+        plugins: [react()],
+        resolve: {
+            alias: {
+                "@": path_packages,
+            }
+        },
         build: {
             target: 'esnext',
             // 指定输出路径（相对于 项目根目录)
-            outDir: resolve(path_root, 'dist/content-scripts'),
+            outDir: resolve(path_root, 'dist/unitTest'),
             emptyOutDir: true,
             rollupOptions: {
                 input: {
-                    contentScript: resolve(path_packages, 'content-scripts/index.tsx'),
+                    contentScript: resolve(path_packages, 'unitTest/index.html'),
                 },
                 output: {
                     chunkFileNames: 'js/[name].js',
@@ -38,6 +42,11 @@ export default function (props: Props) {
             reportCompressedSize: !isDev,
             // 是否生成sourcemap文件
             sourcemap: isDev ? "inline" : undefined,
+        },
+        preview: {
+            host: 'localhost',
+            port: 6789,
+            open: true,
         }
     })
 }

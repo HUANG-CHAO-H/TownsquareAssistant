@@ -6,7 +6,7 @@ import {RoleAvatar} from "../../components/RoleAvatar";
 import {PlayerAvatar} from "../../components/PlayerAvatar";
 import {ChatHelper, useChatContext} from "../../provider/ChatProvider";
 import './style.less';
-import {MessageRow} from "./MessageRow";
+import {MessageRow} from "../../components/ChatWindow/MessageRow";
 
 export function ChatWindow() {
     const chatContext = useChatContext();

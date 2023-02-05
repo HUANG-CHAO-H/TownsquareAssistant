@@ -1,0 +1,9 @@
+{
+  "name": "unit-test",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev --config vite.config.ts --mode development",
+    "build": "vite build --config vite.config.ts"
+  }
+}

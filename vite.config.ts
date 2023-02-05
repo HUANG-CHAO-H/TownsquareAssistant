@@ -5,17 +5,21 @@ import react from '@vitejs/plugin-react'
 const path_packages = resolve(__dirname, 'packages');
 
 // https://vitejs.dev/config/
-export default function ({ mode }) {
-  const isDev = mode === 'development';
+export default function getGlobalConfig(props: Props) {
+  const isDev = props.mode === 'development';
   return defineConfig({
     plugins: [react()],
+    resolve: {
+      alias: {
+        "@": path_packages,
+      }
+    },
     // publicDir: resolve(rootDir, 'static'),
-    // resolve: {
-    //   alias: {
-    //     "@": path_packages,
-    //   }
-    // },
   })
+}
+
+export interface Props {
+  mode?: 'development'
 }
 
 /**
