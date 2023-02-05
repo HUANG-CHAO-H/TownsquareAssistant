@@ -1,0 +1,104 @@
+.chat-window-container {
+  color: black;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  & > div:first-child {
+    position: relative;
+    overflow: hidden;
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+  & > div:nth-child(2) {
+    position: relative;
+    overflow: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding: 5px 0;
+  }
+  & > div:last-child {
+    position: relative;
+    overflow: hidden;
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+
+  .chat-window-header {}
+
+  .chat-window-body {
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: scroll;
+    border-style: inset;
+    border-width: 2px;
+  }
+  .chat-window-footer {
+    & > .semi-input-textarea-wrapper {
+      padding: 5px 0;
+      border-style: ridge;
+      border-radius: 5px;
+      border-color: unset;
+      border-width: unset;
+      & > textArea {
+        padding-right: 60px;
+      }
+    }
+    & > button {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 999px;
+      z-index: 100;
+    }
+  }
+  .chat-message-row {
+    display: flex;
+    align-items: flex-start;
+    margin: 10px;
+    .chat-message-avatar {
+      width: 32px;
+      height: 32px;
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
+    .chat-message-content {
+      flex-grow: 1;
+      flex-shrink: 1;
+      padding: 0 10px;
+      & > div:last-child {
+        border-radius: 9999px;
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #e9ecec;
+        text-align: left;
+      }
+    }
+  }
+}
+
+.new-scroll-bar::-webkit-scrollbar-track-piece {
+  background-color: #fff;
+  -webkit-border-radius: 0
+}
+.new-scroll-bar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px
+}
+.new-scroll-bar::-webkit-scrollbar-thumb {
+  height: 50px;
+  background-color: #b8b8b8;
+  -webkit-border-radius: 6px;
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  border: 2px solid #fff;
+  -moz-opacity: 0.5;
+  opacity: 0.5
+}
+.new-scroll-bar::-webkit-scrollbar-thumb:hover {
+  height: 50px;
+  background-color: #878987;
+  -webkit-border-radius: 6px
+}

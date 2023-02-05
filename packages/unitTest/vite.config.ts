@@ -1,29 +1,22 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import react from "@vitejs/plugin-react";
-
-const path_root = resolve(__dirname, '../../');
-const path_packages = resolve(path_root, 'packages');
+import getGlobalConfig, { path_packages, path_dist, Props } from '../../vite.config';
 
 
 // https://vitejs.dev/config/
-export default function ({mode}) {
-    const isDev = mode === 'development';
+export default function (props: Props) {
+    const isDev = props.mode === 'development';
+    const defaultConfig = getGlobalConfig(props);
     return defineConfig({
-        plugins: [react()],
-        resolve: {
-            alias: {
-                "@": path_packages,
-            }
-        },
+        ...defaultConfig,
         build: {
             target: 'esnext',
             // 指定输出路径（相对于 项目根目录)
-            outDir: resolve(path_root, 'dist/unitTest'),
+            outDir: resolve(path_dist, 'unitTest'),
             emptyOutDir: true,
             rollupOptions: {
                 input: {
-                    contentScript: resolve(path_packages, 'unitTest/index.html'),
+                    unitTest: resolve(path_packages, 'unitTest/index.html'),
                 },
                 output: {
                     chunkFileNames: 'js/[name].js',

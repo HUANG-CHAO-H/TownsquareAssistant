@@ -2,7 +2,9 @@ import { defineConfig } from 'vite';
 import { resolve } from "path";
 import react from '@vitejs/plugin-react'
 
-const path_packages = resolve(__dirname, 'packages');
+export const path_root = resolve(__dirname, './');
+export const path_packages = resolve(path_root, 'packages');
+export const path_dist = resolve(path_root, 'dist');
 
 // https://vitejs.dev/config/
 export default function getGlobalConfig(props: Props) {
@@ -14,7 +16,11 @@ export default function getGlobalConfig(props: Props) {
         "@": path_packages,
       }
     },
-    // publicDir: resolve(rootDir, 'static'),
+    // css: {
+    //   preprocessorOptions: {
+    //     // less: ''
+    //   }
+    // }
   })
 }
 

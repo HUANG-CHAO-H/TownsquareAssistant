@@ -1,18 +1,39 @@
-import React, {useMemo, useState} from "react";
+import React, {useMemo, useState, useRef, useLayoutEffect, createElement} from "react";
 import {Avatar} from "@douyinfe/semi-ui";
 import type {} from '@/models';
 
+export interface ChatWindowBodyProps {
+    chatContent: MessageRowProps[];
+}
+
+export function ChatWindowBody(props: ChatWindowBodyProps) {
+    const divRef = useRef<HTMLDivElement | null>(null);
+    const content = useMemo(
+        () => props.chatContent.map((c, index) => createElement(MessageRow, {...c, key: c.msgKey || String(index)})),
+        [props.chatContent],
+    );
+    // 当依赖发生变化时，强制定位滚动轴到底部
+    useLayoutEffect(() => {
+        const div = divRef.current;
+        if (!div) return;
+        div.scrollTop = div.scrollHeight;
+    }, []);
+    return <div ref={divRef} className={'chat-window-body new-scroll-bar'}>{content}</div>;
+}
+
 export interface MessageRowProps {
+    // 消息的唯一标识
+    msgKey?: string;
     // 头像链接
     avatarUrl: string;
     // 发送者头像所在的方向
     direction: 'left' | 'right';
     // 发送者的名称
     name: string;
-    // 当前消息的时间戳
-    timeStamp: number;
     // 消息内容
     content: React.ReactNode;
+    // 当前消息的时间戳
+    timeStamp: number;
 }
 
 export function MessageRow(props: MessageRowProps) {
@@ -22,13 +43,13 @@ export function MessageRow(props: MessageRowProps) {
     const name = useMemo(() => {
         if (hover && props.timeStamp) {
             if (direction === 'left') {
-                return `${props.name} (${new Date(props.timeStamp).toLocaleDateString()})`;
+                return `${props.name} (${new Date(props.timeStamp).toLocaleTimeString()})`;
             } else if (direction === 'right') {
-                return `(${new Date(props.timeStamp).toLocaleDateString()}) ${props.name}`;
+                return `(${new Date(props.timeStamp).toLocaleTimeString()}) ${props.name}`;
             }
         }
         return props.name
-    }, [props.name, props.timeStamp, direction]);
+    }, [props.name, props.timeStamp, direction, hover]);
     return (
         <div className={'chat-message-row'}>
             <div className={'chat-message-avatar'}>{direction === 'left' ? avatar : null}</div>
