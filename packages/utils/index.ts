@@ -1,4 +1,4 @@
-import {HTMLAttributes, RefAttributes} from "react";
+import React from "react";
 
 export * from './ReactiveData';
 export * from './EventEmitter';
@@ -6,7 +6,8 @@ export * from './useCacheRef';
 export * from './domHelper';
 export * from './SortQueue';
 
-export type ReactHTMLAttributes<T> = HTMLAttributes<T> & RefAttributes<T>
+export type ReactHTMLAttributes<T> = React.HTMLAttributes<T> & React.RefAttributes<T>
+export type ReactSetState<T> = React.Dispatch<React.SetStateAction<T>>;
 
 // 休眠
 export function sleep(time: number) {
