@@ -2,10 +2,11 @@ import React, {useMemo} from "react";
 import {Avatar, Button, Table, Tooltip} from "@douyinfe/semi-ui";
 import {IconComment} from "@douyinfe/semi-icons";
 
+import { sleep } from '../../../utils';
 import {useGameState} from "../provider/GameStateProvider";
 import {PlayerAvatar} from "../components/PlayerAvatar";
 import {RoleAvatar} from "../components/RoleAvatar";
-import { clickPlayerMenu } from "../adapter";
+import {clickPlayerMenu, refreshChatInfo} from "../adapter";
 import {ReminderAvatar} from "../components/ReminderAvatar";
 import {useRoleState} from "../provider/GameRoleProvider";
 
@@ -129,7 +130,9 @@ const tableColumns: any[] = [
             return (
                 <Button
                     icon={<IconComment style={{color:'#1abc9c'}}/>}
-                    onClick={() => clickPlayerMenu(index + 1, '私聊')}
+                    onClick={() => clickPlayerMenu(index + 1, '私聊')
+                        .then(() => sleep(100))
+                        .then(refreshChatInfo)}
                 />
             )
         }

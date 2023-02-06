@@ -15,12 +15,15 @@ export function ChatWindow() {
     const hostInfo = adapterState.useValue('hostPlayer');
     const playerId = Number(chatContext.chatPlayer?.id);
     const staticRef = useRef<Record<string, any>>({});
-    staticRef.current[playerId] = chatInput;
+    staticRef.current.chatInput = chatInput;
     useEffect(() => {
         setChatInput(staticRef.current[playerId] || '');
         setMessage(chatMsgStore.get(playerId) || []);
         chatMsgStore.observe(playerId, setMessage);
-        return () => chatMsgStore.unObserve(playerId, setMessage);
+        return () => {
+            chatMsgStore.unObserve(playerId, setMessage);
+            staticRef.current[playerId] = staticRef.current.chatInput;
+        }
     }, [playerId]);
     const messageBody = useMemo(
         () => message.map(m => <MessageRow direction={hostInfo?.id === m.senderUid ? 'right' : 'left'} msg={m} />),

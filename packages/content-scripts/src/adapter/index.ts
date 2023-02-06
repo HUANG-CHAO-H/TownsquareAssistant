@@ -38,10 +38,7 @@ async function chatLoop() {
         await adapterState.wait('statePolling', value => Boolean(value));
         let sleepTime: number;
         while (true) {
-            const { title, content, input } = readChatInfo();
-            adapterState.set('chatTitle', title);
-            adapterState.set('chatContent', content);
-            adapterState.set('chatInput', input);
+            refreshChatInfo();
             sleepTime = adapterState.get('gameStateString') ? 3000 : 300;
             await Promise.race([
                 sleep(sleepTime),
@@ -53,3 +50,9 @@ async function chatLoop() {
 }
 chatLoop().catch(error => console.error('chatLoop轮询被中断', error));
 
+export function refreshChatInfo() {
+    const { title, content, input } = readChatInfo();
+    adapterState.set('chatTitle', title);
+    adapterState.set('chatContent', content);
+    adapterState.set('chatInput', input);
+}
