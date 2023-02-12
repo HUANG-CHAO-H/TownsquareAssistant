@@ -18,8 +18,7 @@
     "jsx": "react-jsx",
     "typeRoots": [
       "node_modules/@types",
-      "packages/models/index.ts",
-      "typings.d.ts",
+      "packages/models/index.ts"
     ],
     "baseUrl": ".",
     "paths": {
@@ -27,7 +26,6 @@
     }
   },
   "include": [
-    "packages/*",
-    "typings.d.ts",
+    "packages/*"
   ]
 }

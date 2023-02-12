@@ -1,8 +1,21 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import ReactDOM from 'react-dom/client'
-import { Dropdown, Button } from '@douyinfe/semi-ui';
-import {AssistantIndex} from "./src/pages/AssistantIndex";
-import {SettingTest, GameStateJsonTest, GameSeatTest, ChatWindowTest} from "./src/adapter";
+import {Dropdown, Button} from '@douyinfe/semi-ui';
+import {AssistantHome} from "./src/pages/AssistantHome";
+import {
+    SettingTest,
+    GameStateJsonTest,
+    GameSeatTest,
+    ChatWindowTest,
+    adapterState,
+    openGameStateDialog
+} from "./src/adapter";
+import {ChatProvider} from "./src/provider/ChatProvider";
+import {GameEditionProvider} from "./src/provider/GameEditionProvider";
+import {GameHelperProvider} from "./src/provider/GameHelperProvider";
+import {GameRoleProvider} from "./src/provider/GameRoleProvider";
+import {GameStateProvider} from "./src/provider/GameStateProvider";
+import './global.less';
 
 const IS_TEST = false;
 
@@ -54,6 +67,39 @@ if (IS_TEST) {
     );
 } else {
     ReactDOM.createRoot(rootDiv).render(
-        <React.StrictMode><AssistantIndex/></React.StrictMode>
+        <React.StrictMode><App/></React.StrictMode>
     );
+}
+
+function App() {
+    const [visible, setVisible] = useState(false);
+    useEffect(() => adapterState.set('statePolling', visible), [visible]);
+    return (
+        <GameStateProvider>
+            <GameEditionProvider>
+                <GameRoleProvider>
+                    <GameHelperProvider>
+                        <ChatProvider>
+                            {visible ? null : (
+                                <Button
+                                    theme='solid'
+                                    type='secondary'
+                                    onClick={() => setVisible(true)}
+                                    style={buttonStyle}>
+                                    助手
+                                </Button>
+                            )}
+                            <AssistantHome visible={visible} setVisible={setVisible}/>
+                        </ChatProvider>
+                    </GameHelperProvider>
+                </GameRoleProvider>
+            </GameEditionProvider>
+        </GameStateProvider>
+    );
+}
+
+const buttonStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: '70%',
 }

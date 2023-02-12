@@ -16,11 +16,17 @@ export default function getGlobalConfig(props: Props) {
         "@": path_packages,
       }
     },
-    // css: {
-    //   preprocessorOptions: {
-    //     // less: ''
-    //   }
-    // }
+    css: {
+      modules: {
+        generateScopedName: '[local]_[hash:base64:5]',
+        hashPrefix: 'prefix',
+      },
+      preprocessorOptions: {
+        less: {
+          javascriptEnabled: true,
+        }
+      }
+    }
   })
 }
 

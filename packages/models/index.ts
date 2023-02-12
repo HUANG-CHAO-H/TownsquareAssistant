@@ -1,3 +1,5 @@
+/// <reference types="./typings" />
+
 export * from './gamePlayerInfo';
 export * from './gameEditionInfo';
 export * from './gameRoleInfo';

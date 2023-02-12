@@ -26,10 +26,13 @@ export interface GameRoleInfo {
     setup: boolean,
 }
 
+export const ROLE_TEAM = ["townsfolk", "outsider", "minion", "demon", "traveler", "unknown"] as const;
+
 // RoleTeam值的翻译与转化
-export function translateRoleTeam(team: GameRoleInfo['team'], target: 'CN'): string
-export function translateRoleTeam(team: GameRoleInfo['team'], target: 'number'): number
-export function translateRoleTeam(team: GameRoleInfo['team'], target: 'CN' | 'number'): string | number {
+export function translateRoleTeam(team: GameRoleInfo['team'], target: 'CN'): '村民' | '外来者' | '爪牙' | '恶魔' | '旅行者' | '未知类型';
+export function translateRoleTeam(team: GameRoleInfo['team'], target: 'color'): 'blue' | 'light-blue' | 'orange' | 'red' | 'green' | 'grey';
+export function translateRoleTeam(team: GameRoleInfo['team'], target: 'number'): 0 | 1 | 2 | 3 | 4 | 5;
+export function translateRoleTeam(team: GameRoleInfo['team'], target: 'CN' | 'number' | 'color'): string | number {
     if (target === 'CN') {
         switch (team) {
             case "townsfolk": return '村民';
@@ -47,6 +50,15 @@ export function translateRoleTeam(team: GameRoleInfo['team'], target: 'CN' | 'nu
             case 'demon': return 3;
             case 'traveler': return 4;
             default: return 5;
+        }
+    } else if (target === 'color') {
+        switch (team) {
+            case "townsfolk": return 'blue';
+            case "outsider": return 'light-blue';
+            case "minion": return 'orange';
+            case 'demon': return 'red';
+            case 'traveler': return 'green';
+            default: return 'grey';
         }
     }
     return team;

@@ -1,0 +1,17 @@
+.chat-page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 10px 0;
+  .chat-page-header {
+    display: flex;
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+  & > div:last-child {
+    position: relative;
+    min-height: 20px;
+    flex-shrink: 0;
+    flex-grow: 0;
+  }
+}

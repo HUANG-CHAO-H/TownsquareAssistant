@@ -28,11 +28,10 @@ export function AvatarCard(props: AvatarCardProps) {
     const labelWrap = label ? <div style={{paddingLeft: '5px'}}>{label}</div> : null;
     if (popover) {
         return (
-            <Popover position={'bottomLeft'} content={popover} mouseEnterDelay={500}>
-                <div {...divContainerAttr}>
-                    {avatar}{labelWrap}
-                </div>
-            </Popover>
+            <div {...divContainerAttr}>
+                <Popover position={'bottomLeft'} content={popover} mouseEnterDelay={500}>{avatar}</Popover>
+                {labelWrap}
+            </div>
         )
     } else {
         return (

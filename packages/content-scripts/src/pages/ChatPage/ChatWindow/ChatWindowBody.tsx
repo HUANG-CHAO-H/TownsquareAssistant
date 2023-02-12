@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useRef, useLayoutEffect, createElement} from "react";
+import React, {useMemo, useState, useRef, useLayoutEffect, createElement, memo} from "react";
 import {Avatar} from "@douyinfe/semi-ui";
 import type {} from '@/models';
 
@@ -6,7 +6,7 @@ export interface ChatWindowBodyProps {
     chatContent: MessageRowProps[];
 }
 
-export function ChatWindowBody(props: ChatWindowBodyProps) {
+export const ChatWindowBody: React.FC<ChatWindowBodyProps> = memo(props => {
     const divRef = useRef<HTMLDivElement | null>(null);
     const content = useMemo(
         () => props.chatContent.map((c, index) => createElement(MessageRow, {...c, key: c.msgKey || String(index)})),
@@ -19,11 +19,12 @@ export function ChatWindowBody(props: ChatWindowBodyProps) {
         div.scrollTop = div.scrollHeight;
     }, []);
     return <div ref={divRef} className={'chat-window-body new-scroll-bar'}>{content}</div>;
-}
+});
+ChatWindowBody.displayName = 'ChatWindowBody';
 
 export interface MessageRowProps {
     // 消息的唯一标识
-    msgKey?: string;
+    msgKey?: string | number;
     // 头像链接
     avatarUrl: string;
     // 发送者头像所在的方向

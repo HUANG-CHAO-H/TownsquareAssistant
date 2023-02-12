@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import {writeChatMsg, adapterState } from "../adapter";
-import {useGameState} from "./GameStateProvider";
-import {useRoleState} from "./GameRoleProvider";
+import {useGameHelper} from "./GameHelperProvider";
 
 export class ChatHelper {
     /**
@@ -26,23 +25,20 @@ export function useChatContext() {return useContext(ChatContext)}
 
 export function ChatProvider(props: {children?: React.ReactNode}) {
     const [contextValue, setContextValue] = useState(defaultValue);
-    const { gameState } = useGameState();
-    const roleState = useRoleState();
+    const gameHelper = useGameHelper();
     useEffect(() => {
-        if (!gameState) return void setContextValue(defaultValue);
+        if (!gameHelper) return void setContextValue(defaultValue);
         const observer = (chatTitle: string) => {
-            const playerSeat = gameState.players.findIndex(value => value.name === chatTitle);
-            if (playerSeat >= 0) {
-                const player = gameState.players[playerSeat];
-                setContextValue(new ChatHelper(player, roleState.currentRoles[player.role], playerSeat + 1));
-            } else {
-                setContextValue(defaultValue);
-            }
+            const player = gameHelper.getPlayerByName(chatTitle);
+            if (!player) return void setContextValue(defaultValue);
+            const role = gameHelper.getPlayerRole(player.id)
+            const playerSeat = gameHelper.getSeatByPlayer(player.id);
+            setContextValue(new ChatHelper(player, role, playerSeat));
         }
         observer(adapterState.data.chatTitle);
         adapterState.observe('chatTitle', observer);
         return () => adapterState.unObserve('chatTitle', observer)
-    }, [gameState?.players, roleState?.currentRoles]);
+    }, [gameHelper]);
 
     return <ChatContext.Provider value={contextValue}>{props.children}</ChatContext.Provider>
 }

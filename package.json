@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "types": "typings.d.ts",
   "workspaces": ["packages/*"],
   "scripts": {
     "dev-content-script": "cd packages/content-scripts && yarn run dev",

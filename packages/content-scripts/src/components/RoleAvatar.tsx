@@ -1,9 +1,8 @@
 import React from "react";
-import {Avatar, Tag, Card, Descriptions} from "@douyinfe/semi-ui";
-import type {TagColor} from "@douyinfe/semi-ui/tag/interface";
+import {Avatar, Card, Descriptions} from "@douyinfe/semi-ui";
 import {ReactHTMLAttributes} from "@/utils";
-import {translateRoleTeam} from '@/models';
 import {getIconUrl} from "../adapter";
+import {getRoleTag} from "../utils";
 import {AvatarCard} from "./AvatarCard";
 
 interface RoleAvatarProps {
@@ -43,7 +42,7 @@ const RoleDetailCard = React.memo<{role: GameRoleInfo}>(props => {
     const descriptionData = [
         { key: '角色ID', value: roleInfo.id },
         { key: '角色名称', value: roleInfo.name },
-        { key: '角色类型', value: <Tag color={getRoleTeamColor(roleInfo.team)}>{translateRoleTeam(roleInfo.team, 'CN')}</Tag> },
+        { key: '角色类型', value: getRoleTag(roleInfo.team) },
         { key: '角色能力', value: roleInfo.ability },
         { key: '首夜技能', value: roleInfo.firstNightReminder },
         { key: '非首夜技能', value: roleInfo.otherNightReminder},
@@ -65,14 +64,3 @@ const RoleDetailCard = React.memo<{role: GameRoleInfo}>(props => {
         </Card>
     )
 })
-
-function getRoleTeamColor(team: GameRoleInfo['team']): TagColor {
-    switch (translateRoleTeam(team, 'number')) {
-        case 0: return 'blue';
-        case 1: return 'light-blue';
-        case 2: return 'orange';
-        case 3: return 'red';
-        case 4: return 'green';
-        default: return 'grey';
-    }
-}

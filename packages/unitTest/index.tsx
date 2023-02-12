@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ChatWindow } from '../content-scripts/src/components/ChatWindow';
+import { ChatWindow } from '../content-scripts/src/pages/ChatPage/ChatWindow';
+import { createChatTooltip } from '../content-scripts/src/pages/ChatPage';
 
 const divStyle: React.CSSProperties = {
     position: "absolute",
@@ -34,7 +35,7 @@ ReactDOM.createRoot(document.querySelector('#root')!).render(
                 {avatarUrl: '', name: 'Hchao', content: 'hello world', direction: 'right', timeStamp: Date.now()},
                 {avatarUrl: '', name: 'Hchao', content: 'hello world', direction: 'left', timeStamp: Date.now()},
                 {avatarUrl: '', name: 'Hchao', content: 'hello world', direction: 'right', timeStamp: Date.now()},
-            ]}/>
+            ]} getChatTooltip={createChatTooltip}/>
         </div>
     </React.StrictMode>
 );

@@ -1,5 +1,5 @@
 import { sleep } from '../../../utils'
-import {closeGameStateDialog, controlGameState, readChatInfo} from './webPageAnalysis';
+import {closeGameStateDialog, controlGameState, controlGameStateDialog, readChatInfo} from './webPageAnalysis';
 import { chatMsgStore, adapterState, adapterEvent } from './context';
 import './network';
 import './chatMessage';
@@ -49,6 +49,8 @@ async function chatLoop() {
     }
 }
 chatLoop().catch(error => console.error('chatLoop轮询被中断', error));
+
+adapterState.observe('statePolling', value => void controlGameStateDialog(value));
 
 export function refreshChatInfo() {
     const { title, content, input } = readChatInfo();

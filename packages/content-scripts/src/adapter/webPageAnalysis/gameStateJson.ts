@@ -56,6 +56,7 @@ function getButtonLoad(div = getGameStateJsonDiv()): HTMLDivElement | null {
  */
 export async function controlGameStateDialog(isOpen: false): Promise<null>
 export async function controlGameStateDialog(isOpen: true): Promise<HTMLDivElement>
+export async function controlGameStateDialog(isOpen: boolean): Promise<null | HTMLDivElement>
 export async function controlGameStateDialog(isOpen: boolean = true): Promise<HTMLDivElement | null> {
     // 判断状态与预期是否一致
     const dialogDiv = getGameStateJsonDiv();
