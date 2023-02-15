@@ -1,12 +1,10 @@
 import React, {useEffect, useState} from "react";
-import { TextArea, Button, Cascader } from "@douyinfe/semi-ui";
-import type {TriggerRenderProps} from "@douyinfe/semi-ui/lib/es/cascader";
-import type {Value} from "@douyinfe/semi-ui/cascader";
-import type {CascaderData} from "@douyinfe/semi-ui/cascader/item";
+import { TextArea, Button } from "@douyinfe/semi-ui";
 
 import {useCacheRef, useRefCallback} from "../../../../../utils";
-import './style.less';
+import {CascadeSelect, SelectItem} from "../../../components/CascadeSelect";
 import {ChatWindowBody, ChatWindowBodyProps} from "./ChatWindowBody";
+import './style.less';
 
 export type ChatWindowProps = {
     title?: React.ReactNode;
@@ -15,7 +13,7 @@ export type ChatWindowProps = {
     // 设置input
     setInput?: (value: string) => void;
     // 获取输入框智能提示文本
-    getChatTooltip?: (cmd: InputCommandType | undefined) => CascaderData[];
+    getChatTooltip?: (cmd: InputCommandType | undefined) => SelectItem[];
     // 当用户点击发送按钮时
     onClickSend?: (value: string) => void | boolean | Promise<void | boolean>;
 } & ChatWindowBodyProps;
@@ -26,7 +24,7 @@ export function ChatWindow(props: ChatWindowProps) {
     // 输入框中输入的快捷指令
     const [command, setCommand] = useState<IInputCommand>();
     // 输入框上的智能提示文本选项
-    const [selectOptions, setOptions] = useState<{type?: string, options?: CascaderData[]}>({});
+    const [tooltipOptions, setOptions] = useState<{type?: string, options?: SelectItem[]}>({});
     // cache 缓存
     const cacheRef = useCacheRef({
         setInput: props.setInput,
@@ -40,18 +38,19 @@ export function ChatWindow(props: ChatWindowProps) {
             }
             cacheRef.current.setInput?.('');
         },
-        onCascadeChange(value: Value) {
-            const path: string[] = (value instanceof Array ? value : [value]) as any;
-            if (path.length <= 0 || !path[path.length - 1]) return;
-            if (!command) {
-                setInput(input + path[path.length - 1]);
-            } else {
-                setInput(input.slice(0, command.startIndex) + path[path.length - 1]);
+        onCascadeChange(value: (SelectItem | undefined)[]) {
+            for (let i = value.length - 1; i >= 0; i--) {
+                if (!value[i]) continue;
+                if (!command) {
+                    setInput(input + value[i]!.value);
+                } else {
+                    setInput(input.slice(0, command.startIndex) + value[i]!.value);
+                }
+                break;
             }
         }
     });
     const onClickSend = useRefCallback(cacheRef, "onClickSend");
-    const onCascadeChange = useRefCallback(cacheRef, "onCascadeChange");
     // 上层的值覆盖当前状态
     useEffect(() => setInput(props.input || ''), [props.input]);
     // 延迟向上层传递input变更（节流防抖）
@@ -70,25 +69,19 @@ export function ChatWindow(props: ChatWindowProps) {
         }, 500);
         return () => clearTimeout(timeout);
     }, [input]);
-    // 自定义渲染器
-    const triggerRender = (_props: TriggerRenderProps) => {
-        const cmd = command?.command || '';
-        if (cmd !== _props.inputValue) Promise.resolve().then(() => _props.onChange(cmd));
-        return (
-            <TextArea autosize rows={1} placeholder={'输入聊天信息'} value={input} onChange={setInput}/>
-        )
-    }
     return <div className={'chat-window-container'}>
         <div className={'chat-window-header'}>{props.title}</div>
         <div><ChatWindowBody chatContent={props.chatContent}/></div>
         <div>
-            <div className={'chat-window-footer'} onKeyUp={e => e.key === 'Enter' && !e.shiftKey && onClickSend()}>
+            <div className={'chat-window-footer'}>
                 <Button theme='solid' type='primary' onClick={onClickSend}>发送</Button>
-                <Cascader filterTreeNode treeData={selectOptions.options} value={''}
-                          emptyContent={selectOptions.options?.length ? undefined : <span/>}
-                          triggerRender={triggerRender}
-                          onChange={onCascadeChange}
-                />
+                <CascadeSelect visible={Boolean(tooltipOptions.options)}
+                               listItem={tooltipOptions.options}
+                               onChange={cacheRef.current.onCascadeChange}>
+                    <TextArea autosize rows={1} placeholder={'输入聊天信息'} value={input}
+                              onChange={setInput}
+                              onKeyUp={e => e.key === 'Enter' && !e.shiftKey && onClickSend()}/>
+                </CascadeSelect>
             </div>
         </div>
     </div>;

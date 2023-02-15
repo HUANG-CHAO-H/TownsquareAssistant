@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import { resolve } from "path";
 import react from '@vitejs/plugin-react'
+import postcssImport from 'postcss-import'
+import autoprefixer from 'autoprefixer'
 
 export const path_root = resolve(__dirname, './');
 export const path_packages = resolve(path_root, 'packages');
@@ -17,9 +19,13 @@ export default function getGlobalConfig(props: Props) {
       }
     },
     css: {
+      postcss: {
+        plugins: [postcssImport, autoprefixer]
+      },
       modules: {
-        generateScopedName: '[local]_[hash:base64:5]',
+        // generateScopedName: '[local]_[hash:base64:5]',
         hashPrefix: 'prefix',
+        localsConvention: 'camelCase',
       },
       preprocessorOptions: {
         less: {

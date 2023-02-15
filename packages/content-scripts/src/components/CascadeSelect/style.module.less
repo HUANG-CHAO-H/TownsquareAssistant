@@ -1,0 +1,29 @@
+.select-body-ul {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  &:focus {
+    li[data-selected="true"] {
+      background-color: #6dc2f6 !important;
+    }
+  }
+  & > li {
+    display: flex;
+    padding: 8px 12px;
+    cursor: pointer;
+    &:hover {
+      background-color: #f4f5f5;
+    }
+    &[data-selected="true"] {
+      background-color: #d5e7ff;
+    }
+  }
+}
+
+.cascade-select-body {
+  display: flex;
+  flex-direction: row;
+  min-width: 10px;
+  min-height: 10px;
+}

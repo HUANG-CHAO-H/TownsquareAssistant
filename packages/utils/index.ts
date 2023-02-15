@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 export * from './ReactiveData';
 export * from './EventEmitter';
@@ -41,3 +41,9 @@ export async function loadRemoteJson<D>(url: string, format?: (data: any) => D):
     if (format) return format(await response.json());
     else return tryToParseJson(await response.json());
 }
+
+export const useMap = <F, T>(
+    array: F[],
+    callbackFn: (value: F, index: number, array: F[]) => T,
+    deps: React.DependencyList | undefined
+): T[] => useMemo(() => array.map(callbackFn), deps);
