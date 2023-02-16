@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import { TextArea, Button } from "@douyinfe/semi-ui";
 
 import {useCacheRef, useRefCallback} from "../../../../../utils";
-import {CascadeSelect, SelectItem} from "../../../components/CascadeSelect";
+import {CascadeSelect, GroupSelectItem, ISelectItem} from "../../../components/CascadeSelect";
 import {ChatWindowBody, ChatWindowBodyProps} from "./ChatWindowBody";
 import './style.less';
 
@@ -13,7 +13,7 @@ export type ChatWindowProps = {
     // 设置input
     setInput?: (value: string) => void;
     // 获取输入框智能提示文本
-    getChatTooltip?: (cmd: InputCommandType | undefined) => SelectItem[];
+    getChatTooltip?: (cmd: InputCommandType | undefined) => ISelectItem[];
     // 当用户点击发送按钮时
     onClickSend?: (value: string) => void | boolean | Promise<void | boolean>;
 } & ChatWindowBodyProps;
@@ -24,7 +24,7 @@ export function ChatWindow(props: ChatWindowProps) {
     // 输入框中输入的快捷指令
     const [command, setCommand] = useState<IInputCommand>();
     // 输入框上的智能提示文本选项
-    const [tooltipOptions, setOptions] = useState<{type?: string, options?: SelectItem[]}>({});
+    const [tooltipOptions, setOptions] = useState<{type?: string, options?: GroupSelectItem}>({});
     // cache 缓存
     const cacheRef = useCacheRef({
         setInput: props.setInput,
@@ -38,15 +38,11 @@ export function ChatWindow(props: ChatWindowProps) {
             }
             cacheRef.current.setInput?.('');
         },
-        onCascadeChange(value: (SelectItem | undefined)[]) {
-            for (let i = value.length - 1; i >= 0; i--) {
-                if (!value[i]) continue;
-                if (!command) {
-                    setInput(input + value[i]!.value);
-                } else {
-                    setInput(input.slice(0, command.startIndex) + value[i]!.value);
-                }
-                break;
+        onCascadeSelect(value: ISelectItem | undefined) {
+            if (!command) {
+                setInput(input + value?.value || '');
+            } else {
+                setInput(input.slice(0, command.startIndex) + value?.value || '');
             }
         }
     });
@@ -63,7 +59,12 @@ export function ChatWindow(props: ChatWindowProps) {
                 if (oldV.type === cmd?.type) return oldV;
                 return {
                     type: cmd?.type,
-                    options: cacheRef.current.getChatTooltip?.(cmd?.type) || []
+                    options: {
+                        itemKey: 'root',
+                        label: '',
+                        value: '',
+                        childItem: cacheRef.current.getChatTooltip?.(cmd?.type) || [],
+                    }
                 }
             });
         }, 500);
@@ -76,8 +77,9 @@ export function ChatWindow(props: ChatWindowProps) {
             <div className={'chat-window-footer'}>
                 <Button theme='solid' type='primary' onClick={onClickSend}>发送</Button>
                 <CascadeSelect visible={Boolean(tooltipOptions.options)}
-                               listItem={tooltipOptions.options}
-                               onChange={cacheRef.current.onCascadeChange}>
+                               searchKey={command?.command}
+                               groupItem={tooltipOptions.options}
+                               onSelected={cacheRef.current.onCascadeSelect}>
                     <TextArea autosize rows={1} placeholder={'输入聊天信息'} value={input}
                               onChange={setInput}
                               onKeyUp={e => e.key === 'Enter' && !e.shiftKey && onClickSend()}/>
